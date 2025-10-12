@@ -1,0 +1,5 @@
+api_rest/node_modules/
+api_rest/.env
+.DS_Store
+*.log
+.vscode/
