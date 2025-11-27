@@ -1,0 +1,38 @@
+schemas:
+  NewCourse:
+    type: object
+    required: 
+      - name
+      - description
+      - category
+      - startDate
+      - endDate
+      - state
+      - instructorUserId
+    properties:
+      name:
+        type: string
+        description: Name of the course
+      description:
+        type: string
+        description: Description of the course
+      category:
+        type: string
+        description: Course category
+      startDate:
+        type: string
+        format: date
+        description: Course start date (YYYY-MM-DD)
+      endDate:
+        type: string
+        format: date
+        description: Course end date (YYYY-MM-DD)
+      state:
+        type: string
+        enum:
+          - Activo
+          - Inactivo
+        description: Course status (Active or Inactive)
+      instructorUserId:
+        type: integer
+        description: ID of the instructor responsible for the course
