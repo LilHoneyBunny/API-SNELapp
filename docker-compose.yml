@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  mysql_users:
+    image: mysql:8.0
+    container_name: mysql_users
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_USERS_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_USERS_DB}
+      MYSQL_USER: ${MYSQL_USERS_USER}
+      MYSQL_PASSWORD: ${MYSQL_USERS_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - users_data:/var/lib/mysql
+      - ./user_service/script/script.sql:/docker-entrypoint-initdb.d/script.sql
+
+  mysql_courses:
+    image: mysql:8.0
+    container_name: mysql_courses
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_COURSES_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_COURSES_DB}
+      MYSQL_USER: ${MYSQL_COURSES_USER}
+      MYSQL_PASSWORD: ${MYSQL_COURSES_PASSWORD}
+    ports:
+      - "3308:3306"
+    volumes:
+      - courses_data:/var/lib/mysql
+      - ./course_service/script/script.sql:/docker-entrypoint-initdb.d/script.sql
+
+volumes:
+  users_data:
+  courses_data:
