@@ -1,7 +1,7 @@
 const { request, response } = require("express");
 const e = require ("express");
 const path = require('path');
-const {createCourse, updateCourseState, updateCourseDetails, getAllCoursesByInstructor, getCourseById} = require("../database/dao/courseDAO");
+const {createCourse, updateCourseState, updateCourseDetails, getAllCoursesByInstructor, getCourseById, joinCourse} = require("../database/dao/courseDAO");
 const HttpStatusCodes = require('../utils/enums');
 const { count } = require("console");
 
@@ -148,4 +148,35 @@ const getCoursesByInstructor = async (req, res = response) => {
     }
 };
 
-module.exports = {createCurso, updateCourse, setCourseState, getCourseDetailById, getCoursesByInstructor};
+const joinCurso = async (req, res = response) => {
+    const { studentUserId, joinCode } = req.body;
+
+    if (!studentUserId || !joinCode) {
+        return res.status(HttpStatusCodes.BAD_REQUEST).json({
+            error: true,
+            details: "Missing studentUserId or joinCode"
+        });
+    }
+
+    try {
+        const result = await joinCourse(studentUserId, joinCode);
+
+        if (!result.success) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                error: true,
+                details: result.message
+            });
+        }
+
+        return res.status(HttpStatusCodes.OK).json({
+            message: result.message
+        });
+
+    } catch (error) {
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: true,
+            details: "Error joining the course. Try again later"
+        });
+    }
+};
+module.exports = {createCurso, updateCourse, setCourseState, getCourseDetailById, getCoursesByInstructor, joinCurso};

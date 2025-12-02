@@ -1,6 +1,6 @@
 const {Router} = require ('express');
 const router = Router();
-const{createCurso, setCourseState, updateCourse, getCourseDetailById, getCoursesByInstructor} = require('../controller/courseController');
+const{createCurso, setCourseState, updateCourse, getCourseDetailById, getCoursesByInstructor, joinCurso} = require('../controller/courseController');
 
 /**
  * @swagger
@@ -154,5 +154,65 @@ router.get('/:courseId', getCourseDetailById);
  */
 router.get('/instructor/:instructorId', getCoursesByInstructor);
 
+/**
+ * @swagger
+ * /courses/join:
+ *   post:
+ *     summary: Join a course using a join code
+ *     tags: [Courses]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               studentUserId:
+ *                 type: integer
+ *                 description: ID of the student who wants to join
+ *                 example: 5
+ *               joinCode:
+ *                 type: string
+ *                 description: Unique code of the course
+ *                 example: AB12CD3
+ *     responses:
+ *       200:
+ *         description: Student successfully joined the course
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Student successfully joined the course
+ *       400:
+ *         description: Invalid code, inactive course, or student already joined / Missing fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: true
+ *                 details:
+ *                   type: string
+ *                   example: Invalid code, inactive course, or student already joined
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: true
+ *                 details:
+ *                   type: string
+ *                   example: Error joining the course. Try again later
+ */
+router.post('/join', joinCurso);
 
 module.exports = router;

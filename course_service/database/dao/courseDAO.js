@@ -134,5 +134,36 @@ const getAllCoursesByInstructor = async (instructorUserId) => {
     }
 };
 
+const joinCourse = async (studentUserId, joinCode) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        await dbConnection.beginTransaction();
 
-module.exports = {createCourse, updateCourseDetails, updateCourseState, getCourseById, getAllCoursesByInstructor}
+        const [result] = await dbConnection.execute(
+            `INSERT INTO Curso_Student (cursoId, studentUserId)
+             SELECT cursoId, ? FROM Curso WHERE joinCode = ? AND state = 'Activo'
+               AND cursoId NOT IN (
+                   SELECT cursoId FROM Curso_Student WHERE studentUserId = ?
+               )`,
+            [studentUserId, joinCode, studentUserId]
+        );
+
+        await dbConnection.commit();
+
+        if (result.affectedRows === 0) {
+            return { success: false, message: "Invalid code, inactive course, or student already joined" };
+        }
+
+        return { success: true, message: "Student successfully joined the course" };
+
+    } catch (error) {
+        await dbConnection.rollback();
+        console.error("Error joining course:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+
+module.exports = {createCourse, updateCourseDetails, updateCourseState, getCourseById, getAllCoursesByInstructor, joinCourse}
