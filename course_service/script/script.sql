@@ -21,6 +21,14 @@ CREATE TABLE IF NOT EXISTS Content (
     FOREIGN KEY (cursoId) REFERENCES Curso(cursoId) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS ContentFile (
+    fileId INT AUTO_INCREMENT PRIMARY KEY,
+    contentId INT NOT NULL,
+    fileUrl VARCHAR(500) NOT NULL,
+    fileType VARCHAR(50),
+    FOREIGN KEY (contentId) REFERENCES Content(contentId) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS Curso_Student (
     cursoId INT NOT NULL,
     studentUserId INT NOT NULL,

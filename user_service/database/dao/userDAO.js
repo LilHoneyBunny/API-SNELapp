@@ -26,7 +26,7 @@ const createUser = async (user) => {
         if (user.userType === 'Student') {
             await dbConnection.execute(
                 `INSERT INTO Student (studentId, levelId, average) VALUES (?, ?, ?)`,
-                [userId, user.levelId ?? 'Secundaria', user.average ?? 0.00]
+                [userId, user.levelId ?? 1, user.average ?? 0.00]
             );
         } else if (user.userType === 'Instructor') {
             const titleId = titleMap[user.titleName] || 3; 
@@ -86,6 +86,7 @@ const login = async (email, userPassword) => {
             }
 
             loginResult = {
+                userId: user.userId, 
                 email: user.email,
                 role: user.userType,
                 name: user.userName,

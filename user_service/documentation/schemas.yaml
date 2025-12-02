@@ -33,4 +33,19 @@ schemas:
       isVerified:
         type: boolean
         description: true si la cuenta está verificada o false si no lo está
-      
+  Instructor:
+    type: object
+    required:
+      - instructorId
+      - titleId
+    properties:
+      instructorId:
+        type: integer
+        description: ID del instructor
+      titleId:
+        type: integer
+        description: ID del título o grado del instructor
+      biography:
+        type: string
+        nullable: true
+        description: Biografía del instructor 

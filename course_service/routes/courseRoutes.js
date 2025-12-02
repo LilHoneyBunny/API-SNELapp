@@ -1,6 +1,6 @@
 const {Router} = require ('express');
 const router = Router();
-const{createCurso, setCourseState, updateCourse} = require('../controller/courseController');
+const{createCurso, setCourseState, updateCourse, getCourseDetailById, getCoursesByInstructor} = require('../controller/courseController');
 
 /**
  * @swagger
@@ -107,6 +107,52 @@ router.patch('/updateCourse', updateCourse);
  *         description: Server error
  */
 router.patch('/setCourseState', setCourseState);
+
+/**
+ * @swagger
+ * /courses/{courseId}:
+ *   get:
+ *     summary: Get a course by its ID
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the course to retrieve
+ *     responses:
+ *       200:
+ *         description: Course fetched successfully
+ *       404:
+ *         description: Course not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/:courseId', getCourseDetailById);
+
+/**
+ * @swagger
+ * /courses/instructor/{instructorId}:
+ *   get:
+ *     summary: Get all courses created by an instructor
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: instructorId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the instructor whose courses will be fetched
+ *     responses:
+ *       200:
+ *         description: Courses fetched successfully
+ *       404:
+ *         description: No courses found for this instructor
+ *       500:
+ *         description: Server error
+ */
+router.get('/instructor/:instructorId', getCoursesByInstructor);
 
 
 module.exports = router;

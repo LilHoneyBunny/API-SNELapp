@@ -19,6 +19,8 @@ const createCourse = async (course) => {
         await dbConnection.rollback();
         console.error("Course creating error:", error);
         throw error;
+    }finally{
+        dbConnection.release();
     }
 }
 
@@ -54,8 +56,8 @@ const updateCourseDetails = async (cursoId, details) => {
 
         const query = `UPDATE Curso SET ${fields.join(", ")} WHERE cursoId = ?`;
         const [result] = await dbConnection.execute(query, values);
-        return result;
 
+        return result;
     } catch (error) {
         console.error("Error updating course details:", error);
         throw error;
@@ -88,4 +90,38 @@ const updateCourseState = async (cursoId, newState) => {
     }
 };
 
-module.exports = {createCourse, updateCourseDetails, updateCourseState}
+const getCourseById = async (cursoId) => {
+    const dbConnection = await connection.getConnection();
+    try{
+        const [rows] = await dbConnection.execute(
+            `SELECT name, description, category, startDate, endDate, state FROM Curso WHERE cursoId = ?`,
+            [cursoId]
+        );
+
+        return rows;
+    }catch(error){
+        console.error("Error fetching course by ID:", error);
+        throw error;
+    }finally{
+        dbConnection.release();
+    }
+};
+
+const getAllCoursesByInstructor = async (instructorUserId) => {
+    const dbConnection = await connection.getConnection();  
+    try{
+        const [rows] = await dbConnection.execute(
+            `SELECT name, description, category, startDate, endDate, state FROM Curso WHERE instructorUserId = ? AND state = 'Inactivo' `,
+            [instructorUserId]
+        );
+
+        return rows;
+    }catch(error){
+        console.error("Error fetching instructor courses:", error);
+        throw error;
+    }finally{
+        dbConnection.release();
+    }
+};
+
+module.exports = {createCourse, updateCourseDetails, updateCourseState, getCourseById, getAllCoursesByInstructor}

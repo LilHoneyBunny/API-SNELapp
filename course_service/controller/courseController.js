@@ -1,8 +1,9 @@
 const { request, response } = require("express");
 const e = require ("express");
 const path = require('path');
-const {createCourse, updateCourseState, updateCourseDetails} = require("../database/dao/courseDAO");
+const {createCourse, updateCourseState, updateCourseDetails, getAllCoursesByInstructor, getCourseById} = require("../database/dao/courseDAO");
 const HttpStatusCodes = require('../utils/enums');
+const { count } = require("console");
 
 const createCurso = async(req, res = response) => {
     const {name, description, category, startDate, endDate, state, instructorUserId}= req.body;
@@ -62,6 +63,7 @@ const updateCourse = async (req, res = response) => {
         }
 
         return res.status(HttpStatusCodes.OK).json({
+            statusCode:HttpStatusCodes.OK,
             message: "Course updated successfully"
         });
 
@@ -105,4 +107,44 @@ const setCourseState = async (req, res = response) => {
     }
 };
 
-module.exports = {createCurso, updateCourse, setCourseState};
+const getCourseDetailById = async (req, res = response) =>{
+    const {courseId} = req.params;
+
+    try{
+        const result = await getCourseById (courseId);
+
+        return res.status(HttpStatusCodes.OK).json({
+            count: result.length,
+            message:"Query executed successfully",
+            result
+        });
+    }catch(error){
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: true, 
+            statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+            details: "Server error. Could not fetch courses"
+        });
+    }
+};
+
+const getCoursesByInstructor = async (req, res = response) => {
+    const {instructorId} = req.params;
+
+    try{
+        const result = await getAllCoursesByInstructor (instructorId);
+
+        return res.status(HttpStatusCodes.OK).json({
+            count: result.length,
+            message: "Query executed successfully",
+            result
+        });
+    }catch(error){
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: true,
+            statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR, 
+            details: "Server error. Could not fetch courses"
+        });
+    }
+};
+
+module.exports = {createCurso, updateCourse, setCourseState, getCourseDetailById, getCoursesByInstructor};

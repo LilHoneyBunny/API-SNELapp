@@ -36,3 +36,34 @@ schemas:
       instructorUserId:
         type: integer
         description: ID of the instructor responsible for the course
+  Content:
+  type: object
+  properties:
+    contentId:
+      type: integer
+    title:
+      type: string
+    type:
+      type: string
+    descripcion:
+      type: string
+    cursoId:
+      type: integer
+  NewContent:
+    type: object
+    required:
+      - title
+      - cursoId
+    properties:
+      title:
+        type: string
+        description: Título del contenido
+      type:
+        type: string
+        description: Tipo de contenido (video, pdf, quiz, etc.)
+      descripcion:
+        type: string
+        description: Descripción del contenido
+      cursoId:
+        type: integer
+        description: ID del curso al que pertenece
