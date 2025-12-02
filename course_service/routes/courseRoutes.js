@@ -1,7 +1,8 @@
 const {Router} = require ('express');
 const router = Router();
 const{createCurso, setCourseState, updateCourse, getCourseDetailById, 
-    getCoursesByInstructor, joinCurso, getCoursesByStudentController} = require('../controller/courseController');
+    getCoursesByInstructor, joinCurso, getCoursesByStudentController,
+    getCoursesByNameController} = require('../controller/courseController');
 
 /**
  * @swagger
@@ -268,5 +269,40 @@ router.post('/join', joinCurso);
  *         description: Server error
  */
 router.get('/student/:studentId', getCoursesByStudentController);
+
+/**
+ * @swagger
+ * /courses/search/by-name:
+ *   get:
+ *     summary: Search courses by name
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Partial or full name of the course
+ *     responses:
+ *       200:
+ *         description: Courses found successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 courses:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Curso'
+ *       400:
+ *         description: Missing query parameter
+ *       500:
+ *         description: Server error
+ */
+router.get('/search/by-name', getCoursesByNameController);
+
+
+
 
 module.exports = router;

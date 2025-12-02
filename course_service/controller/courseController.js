@@ -1,11 +1,12 @@
 const { request, response } = require("express");
 const e = require ("express");
 const path = require('path');
-const {createCourse, updateCourseState, updateCourseDetails, 
-    getAllCoursesByInstructor, getCourseById, joinCourse, 
-    getCoursesByStudent} = require("../database/dao/courseDAO");
 const HttpStatusCodes = require('../utils/enums');
 const { count } = require("console");
+const {createCourse, updateCourseState, updateCourseDetails, 
+    getAllCoursesByInstructor, getCourseById, joinCourse, 
+    getCoursesByStudent, getCoursesByName, getCoursesByCategory, 
+    getCoursesByMonth, getCoursesByState} = require("../database/dao/courseDAO");
 
 const createCurso = async(req, res = response) => {
     const {name, description, category, startDate, endDate, state, instructorUserId}= req.body;
@@ -213,5 +214,31 @@ const getCoursesByStudentController = async (req, res = response) => {
         });
     }
 };
+
+const getCoursesByNameController = async (req, res = response) => {
+    const { name } = req.query;
+
+    if (!name) {
+        return res.status(HttpStatusCodes.BAD_REQUEST).json({
+            error: true,
+            details: "Missing 'name' query parameter"
+        });
+    }
+
+    try {
+        const courses = await getCoursesByName(name);
+
+        return res.status(HttpStatusCodes.OK).json({ courses });
+    } catch (error) {
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: true,
+            details: "Error fetching courses by name"
+        });
+    }
+};
+
+
+
 module.exports = {createCurso, updateCourse, setCourseState, getCourseDetailById, 
-    getCoursesByInstructor, joinCurso, getCoursesByStudentController};
+    getCoursesByInstructor, joinCurso, getCoursesByStudentController,
+    getCoursesByNameController};

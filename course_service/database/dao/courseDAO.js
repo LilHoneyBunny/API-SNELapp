@@ -184,5 +184,28 @@ const getCoursesByStudent = async (studentUserId) => {
         dbConnection.release();
     }
 };
+
+const getCoursesByName = async (name) => {
+    const dbConnection = await connection.getConnection();
+
+    try {
+        const [courses] = await dbConnection.execute(
+            `SELECT * FROM Curso WHERE name LIKE ?`,
+            [`%${name}%`]
+        );
+
+        return courses;
+
+    } catch (error) {
+        console.error("Error fetching courses by name:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+
+
 module.exports = {createCourse, updateCourseDetails, updateCourseState, 
-    getCourseById, getAllCoursesByInstructor, joinCourse, getCoursesByStudent};
+    getCourseById, getAllCoursesByInstructor, joinCourse, getCoursesByStudent,
+    getCoursesByName};
