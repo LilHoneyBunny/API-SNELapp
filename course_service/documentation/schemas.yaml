@@ -67,3 +67,14 @@ schemas:
       cursoId:
         type: integer
         description: ID del curso al que pertenece
+  ContentFile:
+        type: object
+        properties:
+          fileId:
+            type: integer
+          filename:
+            type: string
+          fileType:
+            type: string
+          url:
+            type: string
