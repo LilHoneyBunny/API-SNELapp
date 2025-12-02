@@ -2,7 +2,7 @@ const {Router} = require ('express');
 const router = Router();
 const{registerUser, userLogin, verifyUser}=require('../controllers/userController');
 const uploadProfileImage = require("../middleware/uploadProfileImage");
-const { verifyToken } = require('../middlewares/authMiddleware');
+const { verifyToken } = require('../middleware/authMiddleware');
 const { updateUserBasicProfileController } = require("../controllers/profileController");
 
 
