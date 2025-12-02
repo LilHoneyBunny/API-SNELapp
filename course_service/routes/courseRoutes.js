@@ -375,4 +375,39 @@ router.get('/search/by-category', getCoursesByCategoryController);
  */
 router.get('/search/by-month', getCoursesByMonthController);
 
+
+
+/**
+ * @swagger
+ * /courses/search/by-state:
+ *   get:
+ *     summary: Search courses by state
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: query
+ *         name: state
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [Activo, Inactivo]
+ *         description: State of the course
+ *     responses:
+ *       200:
+ *         description: Courses found successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 courses:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Curso'
+ *       400:
+ *         description: Missing or invalid state query parameter
+ *       500:
+ *         description: Server error
+ */
+router.get('/search/by-state', getCoursesByStateController);
+
 module.exports = router;

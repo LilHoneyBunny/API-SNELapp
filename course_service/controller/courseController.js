@@ -281,6 +281,28 @@ const getCoursesByMonthController = async (req, res = response) => {
     }
 };
 
+const getCoursesByStateController = async (req, res = response) => {
+    const { state } = req.query;
+
+    if (!state || !["Activo","Inactivo"].includes(state)) {
+        return res.status(HttpStatusCodes.BAD_REQUEST).json({
+            error: true,
+            details: "Missing or invalid 'state' query parameter"
+        });
+    }
+
+    try {
+        const courses = await getCoursesByState(state);
+
+        return res.status(HttpStatusCodes.OK).json({ courses });
+    } catch (error) {
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: true,
+            details: "Error fetching courses by state"
+        });
+    }
+};
+
 module.exports = {createCurso, updateCourse, setCourseState, getCourseDetailById, 
     getCoursesByInstructor, joinCurso, getCoursesByStudentController,
     getCoursesByNameController, getCoursesByCategoryController, getCoursesByMonthController, 

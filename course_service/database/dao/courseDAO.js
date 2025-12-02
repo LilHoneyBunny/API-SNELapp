@@ -242,6 +242,25 @@ const getCoursesByMonth = async (year, month) => {
         dbConnection.release();
     }
 };
+
+const getCoursesByState = async (state) => {
+    const dbConnection = await connection.getConnection();
+
+    try {
+        const [courses] = await dbConnection.execute(
+            `SELECT * FROM Curso WHERE state = ?`,
+            [state]
+        );
+
+        return courses;
+
+    } catch (error) {
+        console.error("Error fetching courses by state:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
 module.exports = {createCourse, updateCourseDetails, updateCourseState, 
     getCourseById, getAllCoursesByInstructor, joinCourse, getCoursesByStudent,
-    getCoursesByName, getCoursesByCategory, getCoursesByMonth};
+    getCoursesByName, getCoursesByCategory, getCoursesByMonth, getCoursesByState};
