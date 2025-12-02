@@ -45,7 +45,7 @@ const {createNewContent, updateContent, deleteContent, getContentByCourse} = req
  *       500:
  *         description: Error del servidor
  */
-router.post('/createContent', createNewContent);
+router.post('/createNewContent', createNewContent);
 
 /**
  * @swagger
@@ -84,7 +84,7 @@ router.post('/createContent', createNewContent);
  *       500:
  *         description: Error del servidor
  */
-router.patch('/updateContent/{contentId}', updateContent);
+router.patch('/updateContent/:contentId', updateContent);
 
 /**
  * @swagger
@@ -107,7 +107,7 @@ router.patch('/updateContent/{contentId}', updateContent);
  *       500:
  *         description: Error del servidor
  */
-router.delete('/deleteContent/{contentId}', deleteContent);
+router.delete('/deleteContent/:contentId', deleteContent);
 
 /**
  * @swagger
@@ -128,6 +128,6 @@ router.delete('/deleteContent/{contentId}', deleteContent);
  *       500:
  *         description: Error del servidor
  */
-router.get('/byCourse/{cursoId}', getContentByCourse);
+router.get('/byCourse/:cursoId', getContentByCourse);
 
 module.exports = router;

@@ -37,8 +37,8 @@ schemas:
         type: integer
         description: ID of the instructor responsible for the course
   Content:
-  type: object
-  properties:
+    type: object
+    properties:
     contentId:
       type: integer
     title:

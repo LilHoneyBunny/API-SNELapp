@@ -59,7 +59,7 @@ const {uploadContentFile, getFilesByContentController, deleteFileController} = r
  *       500:
  *         description: Error en el servidor al subir archivo
  */
-router.post("/:contentId/upload", multer.single("file"),uploadContentFile);
+router.post("/:contentId/upload", upload.single("file"),uploadContentFile);
 
 /**
  * @swagger
