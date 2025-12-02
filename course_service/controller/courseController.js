@@ -259,6 +259,29 @@ const getCoursesByCategoryController = async (req, res = response) => {
     }
 };
 
+const getCoursesByMonthController = async (req, res = response) => {
+    const { year, month } = req.query;
+
+    if (!year || !month) {
+        return res.status(HttpStatusCodes.BAD_REQUEST).json({
+            error: true,
+            details: "Missing 'year' or 'month' query parameter"
+        });
+    }
+
+    try {
+        const courses = await getCoursesByMonth(parseInt(year), parseInt(month));
+
+        return res.status(HttpStatusCodes.OK).json({ courses });
+    } catch (error) {
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: true,
+            details: "Error fetching courses by month"
+        });
+    }
+};
+
 module.exports = {createCurso, updateCourse, setCourseState, getCourseDetailById, 
     getCoursesByInstructor, joinCurso, getCoursesByStudentController,
-    getCoursesByNameController, getCoursesByCategoryController};
+    getCoursesByNameController, getCoursesByCategoryController, getCoursesByMonthController, 
+    getCoursesByStateController};

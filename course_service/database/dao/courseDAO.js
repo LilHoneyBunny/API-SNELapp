@@ -223,6 +223,25 @@ const getCoursesByCategory = async (category) => {
     }
 };
 
+const getCoursesByMonth = async (year, month) => {
+    const dbConnection = await connection.getConnection();
+
+    try {
+        const [courses] = await dbConnection.execute(
+            `SELECT * FROM Curso 
+             WHERE YEAR(startDate) = ? AND MONTH(startDate) = ?`,
+            [year, month]
+        );
+
+        return courses;
+
+    } catch (error) {
+        console.error("Error fetching courses by month:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
 module.exports = {createCourse, updateCourseDetails, updateCourseState, 
     getCourseById, getAllCoursesByInstructor, joinCourse, getCoursesByStudent,
-    getCoursesByName, getCoursesByCategory};
+    getCoursesByName, getCoursesByCategory, getCoursesByMonth};

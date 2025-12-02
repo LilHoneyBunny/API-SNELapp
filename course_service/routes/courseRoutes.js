@@ -2,7 +2,8 @@ const {Router} = require ('express');
 const router = Router();
 const{createCurso, setCourseState, updateCourse, getCourseDetailById, 
     getCoursesByInstructor, joinCurso, getCoursesByStudentController,
-    getCoursesByNameController, getCoursesByCategoryController} = require('../controller/courseController');
+    getCoursesByNameController, getCoursesByCategoryController, getCoursesByMonthController,
+    getCoursesByStateController} = require('../controller/courseController');
 
 /**
  * @swagger
@@ -333,5 +334,45 @@ router.get('/search/by-name', getCoursesByNameController);
  *         description: Server error
  */
 router.get('/search/by-category', getCoursesByCategoryController);
+
+/**
+ * @swagger
+ * /courses/search/by-month:
+ *   get:
+ *     summary: Search courses by month and year
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: query
+ *         name: year
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Year of the course start date
+ *       - in: query
+ *         name: month
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 12
+ *         description: Month of the course start date
+ *     responses:
+ *       200:
+ *         description: Courses found successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 courses:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Curso'
+ *       400:
+ *         description: Missing or invalid query parameters
+ *       500:
+ *         description: Server error
+ */
+router.get('/search/by-month', getCoursesByMonthController);
 
 module.exports = router;
