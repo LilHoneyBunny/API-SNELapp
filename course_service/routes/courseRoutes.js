@@ -1,6 +1,9 @@
 const {Router} = require ('express');
 const router = Router();
-const{createCurso, setCourseState, updateCourse, getCourseDetailById, getCoursesByInstructor} = require('../controller/courseController');
+const{createCurso, setCourseState, updateCourse, getCourseDetailById, 
+    getCoursesByInstructor, joinCurso, getCoursesByStudentController,
+    getCoursesByNameController, getCoursesByCategoryController, getCoursesByMonthController,
+    getCoursesByStateController} = require('../controller/courseController');
 
 /**
  * @swagger
@@ -154,5 +157,257 @@ router.get('/:courseId', getCourseDetailById);
  */
 router.get('/instructor/:instructorId', getCoursesByInstructor);
 
+/**
+ * @swagger
+ * /courses/join:
+ *   post:
+ *     summary: Join a course using a join code
+ *     tags: [Courses]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               studentUserId:
+ *                 type: integer
+ *                 description: ID of the student who wants to join
+ *                 example: 5
+ *               joinCode:
+ *                 type: string
+ *                 description: Unique code of the course
+ *                 example: AB12CD3
+ *     responses:
+ *       200:
+ *         description: Student successfully joined the course
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Student successfully joined the course
+ *       400:
+ *         description: Invalid code, inactive course, or student already joined / Missing fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: true
+ *                 details:
+ *                   type: string
+ *                   example: Invalid code, inactive course, or student already joined
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: boolean
+ *                   example: true
+ *                 details:
+ *                   type: string
+ *                   example: Error joining the course. Try again later
+ */
+router.post('/join', joinCurso);
+
+/**
+ * @swagger
+ * /courses/student/{studentId}:
+ *   get:
+ *     summary: Get all courses a student is enrolled in
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: studentId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the student
+ *     responses:
+ *       200:
+ *         description: Courses fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 courses:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       cursoId:
+ *                         type: integer
+ *                       name:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       category:
+ *                         type: string
+ *                       startDate:
+ *                         type: string
+ *                         format: date
+ *                       endDate:
+ *                         type: string
+ *                         format: date
+ *                       state:
+ *                         type: string
+ *                       instructorUserId:
+ *                         type: integer
+ *                       joinCode:
+ *                         type: string
+ *       404:
+ *         description: No courses found for this student
+ *       500:
+ *         description: Server error
+ */
+router.get('/student/:studentId', getCoursesByStudentController);
+
+/**
+ * @swagger
+ * /courses/search/by-name:
+ *   get:
+ *     summary: Search courses by name
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Partial or full name of the course
+ *     responses:
+ *       200:
+ *         description: Courses found successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 courses:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Curso'
+ *       400:
+ *         description: Missing query parameter
+ *       500:
+ *         description: Server error
+ */
+router.get('/search/by-name', getCoursesByNameController);
+
+/**
+ * @swagger
+ * /courses/search/by-category:
+ *   get:
+ *     summary: Search courses by category
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Category of the course
+ *     responses:
+ *       200:
+ *         description: Courses found successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 courses:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Curso'
+ *       400:
+ *         description: Missing query parameter
+ *       500:
+ *         description: Server error
+ */
+router.get('/search/by-category', getCoursesByCategoryController);
+
+/**
+ * @swagger
+ * /courses/search/by-month:
+ *   get:
+ *     summary: Search courses by month and year
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: query
+ *         name: year
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Year of the course start date
+ *       - in: query
+ *         name: month
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 12
+ *         description: Month of the course start date
+ *     responses:
+ *       200:
+ *         description: Courses found successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 courses:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Curso'
+ *       400:
+ *         description: Missing or invalid query parameters
+ *       500:
+ *         description: Server error
+ */
+router.get('/search/by-month', getCoursesByMonthController);
+
+
+
+/**
+ * @swagger
+ * /courses/search/by-state:
+ *   get:
+ *     summary: Search courses by state
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: query
+ *         name: state
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [Activo, Inactivo]
+ *         description: State of the course
+ *     responses:
+ *       200:
+ *         description: Courses found successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 courses:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Curso'
+ *       400:
+ *         description: Missing or invalid state query parameter
+ *       500:
+ *         description: Server error
+ */
+router.get('/search/by-state', getCoursesByStateController);
 
 module.exports = router;

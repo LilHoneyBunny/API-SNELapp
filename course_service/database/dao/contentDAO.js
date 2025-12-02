@@ -80,4 +80,62 @@ const getContentsByCourse = async (cursoId) => {
     return rows;
 };
 
-module.exports = {createContent, updateContentDetails, deleteContentById, getContentsByCourse};
+const getContentByTitle = async (title) => {
+    const dbConnection = await connection.getConnection();
+
+    try {
+        const [contents] = await dbConnection.execute(
+            `SELECT content.contentId, content.title, content.type, content.descripcion, content.publishDate,
+                    content_file.fileId, content_file.fileUrl AS url, content_file.fileType
+            FROM Content content
+            LEFT JOIN ContentFile content_file ON content.contentId = content_file.contentId
+            WHERE content.title LIKE ?`,
+            [`%${title}%`]
+        );
+
+        return contents;
+
+    } catch (error) {
+        console.error("Error fetching content by title:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+const getContentByDate = async (startDate, endDate) => {
+    const dbConnection = await connection.getConnection();
+
+    try {
+        const [contents] = await dbConnection.execute(
+           `SELECT content.contentId, content.title, content.type, content.descripcion, content.cursoId, content.publishDate,
+            content_file.fileId, content_file.fileUrl AS url, content_file.fileType
+            FROM Content content
+            LEFT JOIN ContentFile content_file ON content.contentId = content_file.contentId
+            WHERE DATE(content.publishDate) BETWEEN ? AND ?
+            ORDER BY content.publishDate DESC`,
+            [startDate, endDate]
+        );
+
+        const results = contents.map(content => ({
+            title: content.title,
+            type: content.type,
+            descripcion: content.descripcion,
+            cursoId: content.cursoId,
+            publishDate: content.publishDate,
+            file: content.fileId ? {url: content.url, fileType: content.fileType } : null
+        }));
+
+        return results;
+
+    } catch (error) {
+        console.error("Error fetching content by date:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+
+module.exports = {createContent, updateContentDetails, deleteContentById, getContentsByCourse, 
+    getContentByTitle, getContentByDate};

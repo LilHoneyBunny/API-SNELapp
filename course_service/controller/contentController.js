@@ -1,6 +1,7 @@
 const { request, response } = require("express");
 const HttpStatusCodes = require('../utils/enums');
-const {createContent, updateContentDetails, deleteContentById, getContentsByCourse} = require("../database/dao/contentDAO");
+const {createContent, updateContentDetails, deleteContentById, getContentsByCourse,
+    getContentByTitle, getContentByDate} = require("../database/dao/contentDAO");
 
 const createNewContent = async(req = request, res = response) => {
     try {
@@ -96,5 +97,47 @@ const getContentByCourse = async (req = request, res = response) => {
     }
 };
 
+const getContentByTitleController = async (req, res = response) => {
+    const { title } = req.query;
 
-module.exports = {createNewContent, updateContent, deleteContent, getContentByCourse};
+    if (!title) {
+        return res.status(HttpStatusCodes.BAD_REQUEST).json({
+            error: true,
+            details: "Missing 'title' query parameter"
+        });
+    }
+
+    try {
+        const contents = await getContentByTitle(title);
+
+        return res.status(HttpStatusCodes.OK).json({ contents });
+    } catch (error) {
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: true,
+            details: "Error fetching content by title"
+        });
+    }
+};
+
+const getContentByDateController = async (req, res = response) => {
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+        return res.status(HttpStatusCodes.BAD_REQUEST).json({
+            error: true,
+            details: "Missing 'startDate' or 'endDate' query parameter"
+        });
+    }
+
+    try {
+        const contents = await getContentByDate(startDate, endDate);
+        return res.status(HttpStatusCodes.OK).json({ contents });
+    } catch (error) {
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: true,
+            details: "Error fetching content by date"
+        });
+    }
+};
+module.exports = {createNewContent, updateContent, deleteContent, getContentByCourse, 
+    getContentByTitleController, getContentByDateController};
