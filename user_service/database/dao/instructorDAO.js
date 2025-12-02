@@ -4,9 +4,9 @@ const getInstructorById = async (instructorId) => {
     const dbConnection = await connection.getConnection();
     try {
         const [rows] = await dbConnection.execute(
-            `SELECT user.userName, user.paternalSurname, user.maternalSurname, instructor.titleId, instructor.biography  
-            FROM User user INNER JOIN Instructor instructor ON user.userId = instructor.instructorId
-            WHERE instructor.instructorId = ?`,
+            `SELECT user.userName, user.paternalSurname, user.maternalSurname, instructor.biography, 
+            title.titleName FROM User user INNER JOIN Instructor instructor ON user.userId = instructor.instructorId
+            INNER JOIN Title title ON instructor.titleId = title.titleId WHERE instructor.instructorId = ?`,
             [instructorId]
         );
 

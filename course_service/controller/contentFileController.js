@@ -53,7 +53,7 @@ const getFilesByContentController = async (req, res) => {
         return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
             status: HttpStatusCodes.INTERNAL_SERVER_ERROR,
-            message: "Error interno del servidor desde el controller",
+            message: "Internal server error from the controller",
         });
     }
 };
@@ -71,7 +71,7 @@ const deleteFileController = async (req, res) => {
         return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
             status: HttpStatusCodes.INTERNAL_SERVER_ERROR,
-            message: "Error interno del servidor desde el controller",
+            message: "Internal server error from the controller",
         });
     }
 };

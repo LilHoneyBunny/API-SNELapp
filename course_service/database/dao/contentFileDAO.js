@@ -1,4 +1,5 @@
 const connection = require ("../pool");
+const HttpStatusCodes = require("../../utils/enums");
 
 const addFileToContent = async (fileData) => {
     const dbConnection = await connection.getConnection();
@@ -26,17 +27,56 @@ const getFilesByContent = async (contentId) => {
         [contentId]
     );
     dbConnection.release();
-    return rows;
+
+    if (rows.length === 0) {
+        return {
+            success: false,
+            status: HttpStatusCodes.NOT_FOUND,
+            message: "No files found for this content"
+        };
+    }
+
+    return {
+        success: true,
+        status: HttpStatusCodes.OK,
+        data: rows
+    };
 };
 
 const deleteFile = async (fileId) => {
-    const dbConnection = await connection.getConnection();
-    const [result] = await dbConnection.execute(
-        "DELETE FROM ContentFile WHERE fileId = ?",
-        [fileId]
-    );
-    dbConnection.release();
-    return result;
+    try {
+        const dbConnection = await connection.getConnection();
+
+        const [result] = await dbConnection.execute(
+            "DELETE FROM ContentFile WHERE fileId = ?",
+            [fileId]
+        );
+
+        dbConnection.release();
+
+        if (result.affectedRows === 0) {
+            return {
+                success: false,
+                status: HttpStatusCodes.NOT_FOUND,
+                message: "El archivo no existe"
+            };
+        }
+
+        return {
+            success: true,
+            status: HttpStatusCodes.OK,
+            message: "Archivo eliminado correctamente"
+        };
+
+    } catch (error) {
+        console.error("Error en deleteFile DAO:", error);
+        return {
+            success: false,
+            status: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+            message: "Error interno en DAO deleteFile"
+        };
+    }
 };
+
 
 module.exports = {addFileToContent, getFilesByContent, deleteFile};
