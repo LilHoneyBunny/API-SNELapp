@@ -6,3 +6,4 @@ user_service/.env
 .DS_Store
 *.log
 .vscode/
+/quiz_service/node_modules
