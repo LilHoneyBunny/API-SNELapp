@@ -1,6 +1,6 @@
 const {Router} = require ('express');
 const router = Router();
-const {createQuestionnaire} = require('../controllers/quizController');
+const {createQuestionnaire} = require('../controller/quizController');
 
 /**
  * @swagger
