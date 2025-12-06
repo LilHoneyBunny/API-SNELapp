@@ -1,7 +1,7 @@
 const {Router} = require ('express');
 const router = Router();
 const {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire,
-    getQuizzesByCourse, searchQuizByTitle, searchQuizByDate} = require('../controller/quizController');
+    getQuizzesByCourse, searchQuizByTitle, searchQuizByDate, getQuizDetailForUser} = require('../controller/quizController');
 
 /**
  * @swagger
@@ -208,4 +208,33 @@ router.get("/searchByTitle", searchQuizByTitle);
  */
 router.get("/searchByDate", searchQuizByDate);
 
+/**
+ * @swagger
+ * /quizzes/{quizId}/view:
+ *   get:
+ *     summary: Get full quiz by ID for user
+ *     security:
+ *       - bearerAuth: []
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the quiz
+ *       - in: header
+ *         name: Authorization
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Bearer token with user role
+ *     responses:
+ *       200:
+ *         description: Quiz details
+ *       404:
+ *         description: Quiz not found
+ */
+router.get("/:quizId/view", getQuizDetailForUser);
 module.exports = router;

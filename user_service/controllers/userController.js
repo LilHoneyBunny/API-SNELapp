@@ -129,7 +129,7 @@ const userLogin = async (req, res = response) => {
                 details: "Invalid credentials, please check your username and password and try again"
             });
         }
-        const token = await generateJWT(email);
+        const token = await generateJWT({userId: user.userId, email:user.email, role: user.role});
         return res.status(HttpStatusCodes.CREATED)
             .json({
                 token,

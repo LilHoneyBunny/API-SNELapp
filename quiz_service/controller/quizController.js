@@ -1,6 +1,8 @@
 const { request, response } = require("express");
 const HttpStatusCodes = require('../utils/enums');
-const {createQuiz, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, getQuizByDateCreation} = require ("../database/dao/quizDAO");
+const jwt = require('jsonwebtoken');
+const {createQuiz, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, getQuizByDateCreation,
+    getQuizById} = require ("../database/dao/quizDAO");
 
 const createQuestionnaire = async (req, res) => {
     try {
@@ -182,5 +184,72 @@ const searchQuizByDate = async (req, res = response) => {
         });
     }
 };
+
+function getRoleFromToken(req) {
+  const header = req.headers.authorization;
+
+  if (!header) {
+    throw new Error("No Authorization header provided");
+  }
+
+  const token = header.split(" ")[1];
+  if (!token) {
+    throw new Error("JWT token not provided");
+  }
+
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  if (!decoded.role) {
+    throw new Error("Role not found in token");
+  }
+
+  return decoded.role;
+}
+
+const getQuizDetailForUser = async (req, res) => {
+    try {
+        const { quizId } = req.params;
+        let userRole;
+
+        try {
+            userRole = getRoleFromToken(req); 
+            console.log("ROLE OBTENIDO:", userRole);
+        } catch (tokenError) {
+            console.error("ERROR OBTENIENDO EL ROL:", tokenError.message);
+            return res.status(HttpStatusCodes.UNAUTHORIZED).json({
+                success: false,
+                message: tokenError.message
+            });
+        }
+
+        const quiz = await getQuizById(quizId);
+        if (!quiz) {
+            return res.status(HttpStatusCodes.NOT_FOUND).json({
+                success: false,
+                message: "Quiz not found"
+            });
+        }
+
+          if (userRole.toLowerCase() === 'student') {
+            quiz.questions.forEach(q => {
+                q.options.forEach(o => {
+                    delete o.isCorrect;
+                });
+            });
+        }
+
+        return res.status(HttpStatusCodes.OK).json({
+            success: true,
+            data: quiz
+        });
+
+    } catch (error) {
+        console.error("Error in getQuizDetailForUser:", error);
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
 module.exports = {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
-    searchQuizByTitle, searchQuizByDate};
+    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser};

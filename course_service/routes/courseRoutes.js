@@ -1,24 +1,10 @@
 const { Router } = require('express');
 const router = Router();
 
-const {
-    createCurso,
-    setCourseState,
-    updateCourse,
-    getCourseDetailById,
-    getCoursesByInstructor,
-    joinCurso,
-    getCoursesByStudentController,
-    getCoursesByNameController,
-    getCoursesByCategoryController,
-    getCoursesByMonthController,
-    getCoursesByStateController,
-    deactivateCourse,
-    unenrollStudentFromCourse,
-    deleteStudentFromCourse,
-    getCategory,
-    modifyCategory
-} = require('../controller/courseController');
+const {createCurso, setCourseState, updateCourse, getCourseDetailById, getCoursesByInstructor, joinCurso,
+    getCoursesByStudentController, getCoursesByNameController, getCoursesByCategoryController, getCoursesByMonthController,
+    getCoursesByStateController, deactivateCourse, unenrollStudentFromCourse, deleteStudentFromCourse, getCategory,
+    modifyCategory} = require('../controller/courseController');
 
 const { verifyToken, requireInstructor, requireStudent } = require('../middleware/authMiddleware');
 

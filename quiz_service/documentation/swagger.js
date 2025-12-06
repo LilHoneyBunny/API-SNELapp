@@ -19,7 +19,8 @@ const options = {
                 description: 'Local host environment',
             },
         ],
-        components: schemas,
+        
+        ...schemas
     },
     apis: ['./routes/*.js'],
 };

@@ -69,7 +69,7 @@ router.put('/:id', uploadProfileImage, updateInstructorProfileController);
  * /instructors/{id}:
  *   put:
  *     summary: Actualizar perfil del instructor (título profesional y biografía)
- *     tags: [Instructor]
+ *     tags: [Instructors]
  *     consumes:
  *       - application/json
  */

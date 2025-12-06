@@ -275,19 +275,7 @@ const updateCourseCategory = async (courseId, newCategory) => {
     }
 };
 
-module.exports = {
-    createCourse,
-    updateCourseDetails,
-    updateCourseState,
-    getCourseById,
-    getAllCoursesByInstructor,
-    joinCourse,
-    getCoursesByStudent,
-    getCoursesByName,
-    getCoursesByCategory,
-    getCoursesByMonth,
-    getCoursesByState,
-    removeStudentFromCourse,
-    getCourseCategory,
-    updateCourseCategory
+module.exports = {createCourse, updateCourseDetails, updateCourseState, getCourseById, getAllCoursesByInstructor, joinCourse,
+    getCoursesByStudent, getCoursesByName, getCoursesByCategory, getCoursesByMonth, getCoursesByState, removeStudentFromCourse,
+    getCourseCategory, updateCourseCategory
 };

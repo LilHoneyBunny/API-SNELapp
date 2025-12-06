@@ -1,4 +1,9 @@
 components:
+  securitySchemes:
+      bearerAuth:
+        type: http
+        scheme: bearer
+        bearerFormat: JWT
   schemas:
     Quiz:
       type: object
@@ -114,3 +119,5 @@ components:
         - cursoId
         - studentUserId
         - score
+security:
+  - bearerAuth: []
