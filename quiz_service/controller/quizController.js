@@ -2,7 +2,7 @@ const { request, response } = require("express");
 const HttpStatusCodes = require('../utils/enums');
 const jwt = require('jsonwebtoken');
 const {createQuiz, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, getQuizByDateCreation,
-    getQuizById, submitQuizAnswers} = require ("../database/dao/quizDAO");
+    getQuizById, submitQuizAnswers, getQuizResult} = require ("../database/dao/quizDAO");
 
 const createQuestionnaire = async (req, res) => {
     try {
@@ -278,5 +278,31 @@ const answerQuiz = async (req, res) => {
     }
 };
 
+const viewQuizResult = async (req, res) => {
+    try {
+        const { quizId, studentUserId, attemptNumber } = req.query;
+        if (!quizId || !studentUserId || !attemptNumber) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                success: false,
+                message: "quizId, studentUserId and attemptNumber are required"
+            });
+        }
+
+        const result = await getQuizResult(quizId, studentUserId, parseInt(attemptNumber));
+
+        return res.status(HttpStatusCodes.OK).json({
+            success: true,
+            result
+        });
+
+    } catch (err) {
+        console.error("viewQuizResult Error:", err);
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Error obtaining quiz result"
+        });
+    }
+};
+
 module.exports = {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
-    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz};
+    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult};

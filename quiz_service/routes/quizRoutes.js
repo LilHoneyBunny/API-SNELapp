@@ -1,7 +1,7 @@
 const {Router} = require ('express');
 const router = Router();
 const {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
-    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz} = require('../controller/quizController');
+    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult} = require('../controller/quizController');
 
 /**
  * @swagger
@@ -281,4 +281,37 @@ router.get("/:quizId/view", getQuizDetailForUser);
  *         description: Error del servidor
  */
 router.post('/answerQuiz', answerQuiz);
+
+/**
+ * @swagger
+ * /quizzes/quizResult:
+ *   get:
+ *     summary: Obtiene el resultado de un quiz contestado
+ *     tags: [Quiz]
+ *     parameters:
+ *       - in: query
+ *         name: quizId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *       - in: query
+ *         name: studentUserId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *       - in: query
+ *         name: attemptNumber
+ *         schema:
+ *           type: integer
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Resultado del quiz
+ *       400:
+ *         description: Parámetros faltantes
+ *       500:
+ *         description: Error del servidor
+ */
+
+router.get('/quizResult', viewQuizResult);
 module.exports = router;

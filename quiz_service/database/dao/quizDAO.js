@@ -287,5 +287,62 @@ const submitQuizAnswers = async (answers, quizId, studentUserId) => {
     }
 };
 
+const getQuizResult = async (quizId, studentUserId, attemptNumber) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [quizRows] = await dbConnection.execute(
+            `SELECT quizId, title, weighing FROM Quiz WHERE quizId = ?`, [quizId]
+        );
+        if (!quizRows.length) throw new Error("Quiz no encontrado");
+        const quiz = quizRows[0];
+
+        const [questionsRows] = await dbConnection.execute(
+            `SELECT question.questionId, question.questionText, question.points,
+                    option_answer.optionId, option_answer.optionText, option_answer.isCorrect,
+                    response.optionId AS selectedOptionId, 
+                    CASE WHEN response.isCorrect = 1 THEN question.points ELSE 0 END AS earnedPoints
+             FROM Question question
+             JOIN OptionAnswer option_answer ON option_answer.questionId = question.questionId
+             LEFT JOIN StudentResponse response 
+               ON response.questionId = question.questionId AND response.quizId = ? AND response.studentUserId = ? AND response.attemptNumber = ?
+             WHERE question.quizId = ?
+             ORDER BY question.questionId, option_answer.optionId`,
+             [quizId, studentUserId, attemptNumber, quizId]
+        );
+
+        const questionsMap = {};
+        questionsRows.forEach(row => {
+            if (!questionsMap[row.questionId]) {
+                questionsMap[row.questionId] = {
+                    questionId: row.questionId,
+                    questionText: row.questionText,
+                    points: row.points,
+                    options: [],
+                    selectedOptionId: row.selectedOptionId,
+                    earnedPoints: row.earnedPoints
+                };
+            }
+            questionsMap[row.questionId].options.push({
+                optionId: row.optionId,
+                optionText: row.optionText,
+                isCorrect: row.isCorrect
+            });
+        });
+
+        const scoreObtained = Object.values(questionsMap).reduce((sum, q) => sum + q.earnedPoints, 0);
+
+        return {
+            quizId: quiz.quizId,
+            title: quiz.title,
+            totalWeighing: quiz.weighing,
+            scoreObtained,
+            questions: Object.values(questionsMap)
+        };
+
+    } finally {
+        dbConnection.release();
+    }
+};
+
 module.exports = {createQuiz, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, 
-    getQuizByDateCreation, getQuizById, submitQuizAnswers};
+    getQuizByDateCreation, getQuizById, submitQuizAnswers, getQuizResult};
