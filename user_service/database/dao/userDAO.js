@@ -165,11 +165,27 @@ const updateUserProfileBasic = async (userId, { userName, paternalSurname, mater
     }
 };
 
-module.exports = {
-    createUser,
-    findUserByEmail,
-    login,
-    findUser,
-    updateUserVerification,
-    updateUserProfileBasic
+const getStudentsByIds = async (studentIds) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        if (!studentIds || studentIds.length === 0) return [];
+
+        const placeholders = studentIds.map(() => '?').join(',');
+        const [rows] = await dbConnection.execute(
+            `SELECT s.studentId, CONCAT(u.userName, ' ', u.paternalSurname, ' ', u.maternalSurname) AS name
+             FROM Student s
+             JOIN User u ON s.studentId = u.userId
+             WHERE s.studentId IN (${placeholders})`,
+            studentIds
+        );
+
+        return rows; 
+    } catch (err) {
+        console.error("Error in getStudentsByIds DAO:", err);
+        return studentIds.map(id => ({ studentId: id, name: "Desconocido" }));
+    } finally {
+        dbConnection.release();
+    }
 };
+
+module.exports = {createUser, findUserByEmail, login, findUser, updateUserVerification, updateUserProfileBasic, getStudentsByIds};

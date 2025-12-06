@@ -4,11 +4,8 @@ const HttpStatusCodes = require('../utils/enums');
 const e = require("express");
 const path = require('path');
 const { sendEmail, loadTemplate, generateVerificationCode } = require("../utils/sendEmail");
-const { createUser, findUserByEmail, login, findUser, updateUserVerification } = require("../database/dao/userDAO");
+const { createUser, findUserByEmail, login, findUser, updateUserVerification, getStudentsByIds } = require("../database/dao/userDAO");
 const { updateUserBasicProfile } = require("../controllers/profileController");
-
-
-const resetTokens = {};
 
 const registerUser = async (req, res = response) => {
     const { userName, paternalSurname, maternalSurname, email, userPassword, userType } = req.body;
@@ -227,5 +224,18 @@ const uploadProfileImage = async (req, res = response) => {
     }
 };
 
+const fetchStudents = async (req, res) => {
+    try {
+        const { ids } = req.query;
+        if (!ids) return res.status(400).json({ success: false, message: "Missing ids parameter" });
 
-module.exports = { registerUser, userLogin, verifyUser, uploadProfileImage };
+        const studentIds = ids.split(',').map(id => parseInt(id));
+        const students = await getStudentsByIds(studentIds);
+
+        res.status(200).json({ success: true, students });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Error obtaining students" });
+    }
+};
+
+module.exports = { registerUser, userLogin, verifyUser, uploadProfileImage, fetchStudents };

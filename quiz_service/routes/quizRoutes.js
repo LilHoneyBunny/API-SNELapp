@@ -287,7 +287,7 @@ router.post('/answerQuiz', answerQuiz);
  * @swagger
  * /quizzes/{quizId}/responses:
  *   get:
- *     summary: Lista los estudiantes que han contestado un cuestionario y su último intento
+ *     summary: Lista los estudiantes que contestaron un quiz con su último intento y puntaje
  *     tags: [Quiz]
  *     parameters:
  *       - in: path
@@ -295,14 +295,14 @@ router.post('/answerQuiz', answerQuiz);
  *         schema:
  *           type: integer
  *         required: true
- *         description: ID del cuestionario
+ *         description: ID del quiz
  *     responses:
  *       200:
- *         description: Lista de estudiantes con su último intento y puntaje
+ *         description: Lista de estudiantes con su puntaje
  *       400:
- *         description: quizId es requerido
+ *         description: quizId no proporcionado
  *       500:
- *         description: Error al obtener la lista de respuestas
+ *         description: Error del servidor
  */
 router.get('/:quizId/responses', listQuizResponses);
 

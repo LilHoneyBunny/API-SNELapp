@@ -297,7 +297,6 @@ const getQuizResponsesList = async (quizId) => {
         );
         return rows;
     } catch (err) {
-        console.error("Error getQuizResponsesList DAO:", err);
         throw err;
     } finally {
         dbConnection.release();

@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const router = Router();
-const { registerUser, userLogin, verifyUser } = require('../controllers/userController');
+const { registerUser, userLogin, verifyUser, fetchStudents} = require('../controllers/userController');
 const uploadProfileImage = require("../middleware/uploadProfileImage");
 const { verifyToken } = require('../middleware/authMiddleware');
 const { updateUserBasicProfile } = require("../controllers/profileController");
@@ -140,5 +140,29 @@ router.put('/:id',
   },
   updateUserBasicProfile // Controlador para actualizar el perfil
 );
+
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Obtiene la información de estudiantes por sus IDs
+ *     tags: [Users]
+ *     parameters:
+ *       - in: query
+ *         name: ids
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: "IDs de los estudiantes separados por coma (ej: 4,5,6)"
+ *     responses:
+ *       200:
+ *         description: Lista de estudiantes
+ *       400:
+ *         description: Parámetros faltantes
+ *       500:
+ *         description: Error del servidor
+ */
+router.get('/', fetchStudents);
+
 
 module.exports = router;

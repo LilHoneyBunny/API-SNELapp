@@ -1,6 +1,7 @@
 const { request, response } = require("express");
 const HttpStatusCodes = require('../utils/enums');
 const jwt = require('jsonwebtoken');
+const { getStudentNames } = require("../service/userService");
 const {createQuiz, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, getQuizByDateCreation,
     getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList} = require ("../database/dao/quizDAO");
 
@@ -61,7 +62,6 @@ const updateQuestionnaire = async (req, res = response) => {
             result
         });
     } catch (error) {
-        console.error("Error updating quiz:", error);
         return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
             error: true,
             statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
@@ -241,7 +241,6 @@ const getQuizDetailForUser = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error in getQuizDetailForUser:", error);
         return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Internal server error"
@@ -270,38 +269,9 @@ const answerQuiz = async (req, res) => {
         });
 
     } catch (err) {
-        console.error("submitQuizController Error:", err);
         return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Error registering quiz answers"
-        });
-    }
-};
-
-const listQuizResponses = async (req, res) => {
-    try {
-        const { quizId } = req.params;
-
-        if (!quizId) {
-            return res.status(HttpStatusCodes.BAD_REQUEST).json({
-                success: false,
-                message: "quizId are required"
-            });
-        }
-
-        const responses = await getQuizResponsesList(quizId);
-
-        return res.status(HttpStatusCodes.OK).json({
-            success: true,
-            quizId,
-            responses
-        });
-
-    } catch (err) {
-        console.error("listQuizResponses Controller Error:", err);
-        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-            success: false,
-            message: "Error retrieving the list of answers"
         });
     }
 };
@@ -324,7 +294,6 @@ const viewQuizResult = async (req, res) => {
         });
 
     } catch (err) {
-        console.error("viewQuizResult Error:", err);
         return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Error obtaining quiz result"
@@ -332,6 +301,38 @@ const viewQuizResult = async (req, res) => {
     }
 };
 
+const listQuizResponses = async (req, res) => {
+    try {
+        const { quizId } = req.params;
+        if (!quizId) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                success: false,
+                message: "quizId are required"
+            });
+        }
+
+        const responses = await getQuizResponsesList(quizId);
+        const studentIds = responses.map(r => r.studentUserId);
+        const users = await getStudentNames(studentIds);
+
+        const combined = responses.map(r => ({
+            ...r,
+            name: users.find(u => u.studentId === r.studentUserId)?.name || "Desconocido"
+        }));
+
+        res.status(HttpStatusCodes.OK).json({
+            success: true,
+            quizId,
+            responses: combined
+        });
+
+    } catch (err) {
+        res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Error obtaining quiz result"
+        });
+    }
+};
 
 
 module.exports = {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
