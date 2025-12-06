@@ -2,7 +2,7 @@ const { request, response } = require("express");
 const HttpStatusCodes = require('../utils/enums');
 const jwt = require('jsonwebtoken');
 const {createQuiz, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, getQuizByDateCreation,
-    getQuizById, submitQuizAnswers, getQuizResult} = require ("../database/dao/quizDAO");
+    getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList} = require ("../database/dao/quizDAO");
 
 const createQuestionnaire = async (req, res) => {
     try {
@@ -278,6 +278,34 @@ const answerQuiz = async (req, res) => {
     }
 };
 
+const listQuizResponses = async (req, res) => {
+    try {
+        const { quizId } = req.params;
+
+        if (!quizId) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                success: false,
+                message: "quizId are required"
+            });
+        }
+
+        const responses = await getQuizResponsesList(quizId);
+
+        return res.status(HttpStatusCodes.OK).json({
+            success: true,
+            quizId,
+            responses
+        });
+
+    } catch (err) {
+        console.error("listQuizResponses Controller Error:", err);
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Error retrieving the list of answers"
+        });
+    }
+};
+
 const viewQuizResult = async (req, res) => {
     try {
         const { quizId, studentUserId, attemptNumber } = req.query;
@@ -304,5 +332,7 @@ const viewQuizResult = async (req, res) => {
     }
 };
 
+
+
 module.exports = {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
-    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult};
+    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult, listQuizResponses};

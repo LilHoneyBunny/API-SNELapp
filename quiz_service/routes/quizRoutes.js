@@ -1,7 +1,8 @@
 const {Router} = require ('express');
 const router = Router();
 const {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
-    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult} = require('../controller/quizController');
+    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult,
+    listQuizResponses} = require('../controller/quizController');
 
 /**
  * @swagger
@@ -284,6 +285,29 @@ router.post('/answerQuiz', answerQuiz);
 
 /**
  * @swagger
+ * /quizzes/{quizId}/responses:
+ *   get:
+ *     summary: Lista los estudiantes que han contestado un cuestionario y su último intento
+ *     tags: [Quiz]
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID del cuestionario
+ *     responses:
+ *       200:
+ *         description: Lista de estudiantes con su último intento y puntaje
+ *       400:
+ *         description: quizId es requerido
+ *       500:
+ *         description: Error al obtener la lista de respuestas
+ */
+router.get('/:quizId/responses', listQuizResponses);
+
+/**
+ * @swagger
  * /quizzes/quizResult:
  *   get:
  *     summary: Obtiene el resultado de un quiz contestado
@@ -312,6 +336,7 @@ router.post('/answerQuiz', answerQuiz);
  *       500:
  *         description: Error del servidor
  */
-
 router.get('/quizResult', viewQuizResult);
+
+
 module.exports = router;

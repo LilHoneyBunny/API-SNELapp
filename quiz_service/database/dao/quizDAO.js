@@ -287,6 +287,23 @@ const submitQuizAnswers = async (answers, quizId, studentUserId) => {
     }
 };
 
+const getQuizResponsesList = async (quizId) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [rows] = await dbConnection.execute(
+            `SELECT studentUserId, MAX(attemptNumber) AS latestAttempt, MAX(score) AS latestScore
+             FROM Score WHERE quizId = ? GROUP BY studentUserId`,
+            [quizId]
+        );
+        return rows;
+    } catch (err) {
+        console.error("Error getQuizResponsesList DAO:", err);
+        throw err;
+    } finally {
+        dbConnection.release();
+    }
+};
+
 const getQuizResult = async (quizId, studentUserId, attemptNumber) => {
     const dbConnection = await connection.getConnection();
     try {
@@ -345,4 +362,4 @@ const getQuizResult = async (quizId, studentUserId, attemptNumber) => {
 };
 
 module.exports = {createQuiz, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, 
-    getQuizByDateCreation, getQuizById, submitQuizAnswers, getQuizResult};
+    getQuizByDateCreation, getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList };
