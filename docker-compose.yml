@@ -28,7 +28,22 @@ services:
     volumes:
       - courses_data:/var/lib/mysql
       - ./course_service/script/script.sql:/docker-entrypoint-initdb.d/script.sql
+  
+  mysql_quizzes:
+    image: mysql:8.0
+    container_name: mysql_quizzes
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_QUIZZES_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_QUIZZES_DB}
+      MYSQL_USER: ${MYSQL_QUIZZES_USER}
+      MYSQL_PASSWORD: ${MYSQL_QUIZZES_PASSWORD}
+    ports:
+      - "3309:3306"
+    volumes:
+      - quizzes_data:/var/lib/mysql
+      - ./quiz_service/script/script.sql:/docker-entrypoint-initdb.d/script.sql
 
 volumes:
   users_data:
   courses_data:
+  quizzes_data:

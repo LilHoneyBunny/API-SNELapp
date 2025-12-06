@@ -121,7 +121,7 @@ const getAllCoursesByInstructor = async (instructorUserId) => {
     const dbConnection = await connection.getConnection();  
     try{
         const [rows] = await dbConnection.execute(
-            `SELECT name, description, category, startDate, endDate, state FROM Curso WHERE instructorUserId = ? AND state = 'Inactivo' `,
+            `SELECT name, description, category, startDate, endDate, state FROM Curso WHERE instructorUserId = ? AND state = 'Activo' `,
             [instructorUserId]
         );
 
@@ -171,7 +171,7 @@ const getCoursesByStudent = async (studentUserId) => {
         const [courses] = await dbConnection.execute(
             `SELECT curso.cursoId, curso.name, curso.description, curso.category, curso.startDate, curso.endDate, curso.state, curso.instructorUserId
              FROM Curso curso INNER JOIN Curso_Student curso_student ON curso.cursoId = curso_student.cursoId
-             WHERE curso_student.studentUserId = ?`,
+             WHERE curso_student.studentUserId = ? AND state = 'Activo'`,
             [studentUserId]
         );
 

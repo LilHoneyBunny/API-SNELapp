@@ -13,11 +13,11 @@ const createCurso = async(req, res = response) => {
 
       if (!name || !category || !startDate || !endDate || !state || !instructorUserId) {
             return res.status(HttpStatusCodes.BAD_REQUEST).json({
-            error: true,
-            statusCode: HttpStatusCodes.BAD_REQUEST,
-            details: "Missing required fields. Please check your input."
-        });
-    }
+                error: true,
+                statusCode: HttpStatusCodes.BAD_REQUEST,
+                details: "Missing required fields. Please check your input."
+            });
+        }
 
     try{
         const result = await createCourse({

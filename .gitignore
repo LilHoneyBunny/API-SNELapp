@@ -1,7 +1,9 @@
 course_service/.env
 user_service/node_modules/
 course_service/node_modules/
+quiz_service/node_modules/
 user_service/.env
+quiz_service/.env
 .env
 .DS_Store
 *.log
