@@ -1,6 +1,6 @@
 const { request, response } = require("express");
 const HttpStatusCodes = require('../utils/enums');
-const {createQuiz, updateQuiz, deleteQuiz, getAllQuiz} = require ("../database/dao/quizDAO");
+const {createQuiz, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, getQuizByDateCreation} = require ("../database/dao/quizDAO");
 
 const createQuestionnaire = async (req, res) => {
     try {
@@ -131,4 +131,56 @@ const getQuizzesByCourse = async (req, res = response) => {
     }
 };
 
-module.exports = {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse};
+const searchQuizByTitle = async (req, res = response) => {
+    try {
+        const { title } = req.query;
+        if (!title) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                error: true,
+                statusCode: HttpStatusCodes.BAD_REQUEST,
+                details: "Title query param is required."
+            });
+        }
+
+        const quizzes = await getQuizByTitle(title);
+
+        return res.status(HttpStatusCodes.OK).json({
+            success: true,
+            data: quizzes
+        });
+    } catch (error) {
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: true,
+            statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+            details: "Error searching quizzes by title."
+        });
+    }
+};
+
+const searchQuizByDate = async (req, res = response) => {
+    try {
+        const { date } = req.query;
+        if (!date) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                error: true,
+                statusCode: HttpStatusCodes.BAD_REQUEST,
+                details: "Date query param is required."
+            });
+        }
+
+        const quizzes = await getQuizByDateCreation(date);
+
+        return res.status(HttpStatusCodes.OK).json({
+            success: true,
+            data: quizzes
+        });
+    } catch (error) {
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: true,
+            statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+            details: "Error searching quizzes by date."
+        });
+    }
+};
+module.exports = {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
+    searchQuizByTitle, searchQuizByDate};

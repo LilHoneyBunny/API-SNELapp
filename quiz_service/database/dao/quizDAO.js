@@ -143,4 +143,40 @@ const getAllQuiz = async (cursoId) => {
     }
 };
 
-module.exports = {createQuiz, updateQuiz, deleteQuiz, getAllQuiz};
+const getQuizByTitle = async (title) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [rows] = await dbConnection.execute(
+            `SELECT quizId, title, description, creationDate, numberQuestion 
+             FROM Quiz 
+             WHERE title LIKE ? COLLATE utf8_general_ci`,
+            [`%${title}%`]
+        );
+        return rows;
+    } catch (error) {
+        console.error("Error fetching quiz by Title:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+const getQuizByDateCreation = async (date) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [rows] = await dbConnection.execute(
+            `SELECT quizId, title, description, creationDate, numberQuestion 
+             FROM Quiz 
+             WHERE creationDate = ?`,
+            [date]
+        );
+        return rows;
+    } catch (error) {
+        console.error("Error fetching quiz by Date:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+module.exports = {createQuiz, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, getQuizByDateCreation};

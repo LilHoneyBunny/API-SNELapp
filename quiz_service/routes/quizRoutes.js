@@ -1,7 +1,7 @@
 const {Router} = require ('express');
 const router = Router();
 const {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire,
-    getQuizzesByCourse} = require('../controller/quizController');
+    getQuizzesByCourse, searchQuizByTitle, searchQuizByDate} = require('../controller/quizController');
 
 /**
  * @swagger
@@ -158,4 +158,54 @@ router.delete("/deleteQuiz/:quizId", deleteQuestionnaire);
  *         description: Internal server error
  */
 router.get("/course/:cursoId", getQuizzesByCourse);
+
+/**
+ * @swagger
+ * /quizzes/searchByTitle:
+ *   get:
+ *     summary: Search quizzes by title
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: query
+ *         name: title
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Title or part of the title to search for
+ *     responses:
+ *       200:
+ *         description: List of quizzes matching the title
+ *       400:
+ *         description: Bad request (title missing)
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/searchByTitle", searchQuizByTitle);
+
+/**
+ * @swagger
+ * /quizzes/searchByDate:
+ *   get:
+ *     summary: Search quizzes by creation date
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Creation date to search for (YYYY-MM-DD)
+ *     responses:
+ *       200:
+ *         description: List of quizzes matching the date
+ *       400:
+ *         description: Bad request (date missing)
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/searchByDate", searchQuizByDate);
+
 module.exports = router;
