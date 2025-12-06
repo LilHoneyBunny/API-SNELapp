@@ -1,17 +1,8 @@
 const { request, response } = require("express");
 const path = require('path');
-const { createCourse,
-    updateCourseState,
-    updateCourseDetails,
-    getAllCoursesByInstructor,
-    getCourseById,
-    removeStudentFromCourse,
-    joinCourse,
-    getCoursesByStudent,
-    getCoursesByName,
-    getCoursesByCategory, 
-    getCoursesByMonth,
-    getCoursesByState } = require("../database/dao/courseDAO");
+const { createCourse, updateCourseState, updateCourseDetails, getAllCoursesByInstructor, getCourseById, removeStudentFromCourse,
+    joinCourse, getCoursesByStudent, getCoursesByName, getCoursesByCategory, getCoursesByMonth, getCoursesByState,
+    getCourseCategory, updateCourseCategory } = require("../database/dao/courseDAO");
 const HttpStatusCodes = require('../utils/enums');
 
 
@@ -418,7 +409,34 @@ const deleteStudentFromCourse = async (req, res) => {
     }
 };
 
+const getCategory = async (req, res) => {
+    const { cursoId } = req.params;
+    try {
+        const category = await getCourseCategory(cursoId);
+        if (!category) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+        res.json({ cursoId, category: category.category });
+    } catch (error) {
+        console.error("Error obtaining category:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
 
+const modifyCategory = async (req, res) => {
+    const { cursoId } = req.params;
+    const { category } = req.body;
+    try {
+        const updated = await updateCourseCategory(cursoId, category);
+        if (!updated) {
+            return res.status(404).json({ message: "Course not found or same category" });
+        }
+        res.json({ message: "Category updated successfully", cursoId, category });
+    } catch (error) {
+        console.error("Error modifying category:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
 
 module.exports = { 
     createCurso, 
@@ -434,5 +452,7 @@ module.exports = {
     getCoursesByStateController, 
     deleteStudentFromCourse, 
     deactivateCourse, 
-    unenrollStudentFromCourse 
+    unenrollStudentFromCourse,
+    getCategory,
+    modifyCategory
 };

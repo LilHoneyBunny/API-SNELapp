@@ -15,7 +15,9 @@ const {
     getCoursesByStateController,
     deactivateCourse,
     unenrollStudentFromCourse,
-    deleteStudentFromCourse
+    deleteStudentFromCourse,
+    getCategory,
+    modifyCategory
 } = require('../controller/courseController');
 
 const { verifyToken, requireInstructor, requireStudent } = require('../middleware/authMiddleware');
@@ -501,5 +503,77 @@ router.put('/:id/deactivate', deactivateCourse);
  *         description: Server error
  */
 router.delete('/:courseId/students/:studentId/unenroll', unenrollStudentFromCourse);
+
+/**
+ * @swagger
+ * /courses/{cursoId}/category:
+ *   get:
+ *     summary: Obtain a course category
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: cursoId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Course ID
+ *     responses:
+ *       200:
+ *         description: Category obtained
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 cursoId:
+ *                   type: integer
+ *                 category:
+ *                   type: string
+ *       404:
+ *         description: Course not found
+ */
+router.get("/:cursoId/category", getCategory);
+
+/**
+ * @swagger
+ * /courses/{cursoId}/category:
+ *   put:
+ *     summary: Modify the category of a course
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: cursoId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Course ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               category:
+ *                 type: string
+ *                 description: New course category
+ *     responses:
+ *       200:
+ *         description: Updated category
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 cursoId:
+ *                   type: integer
+ *                 category:
+ *                   type: string
+ *       404:
+ *         description: Course not found
+ */
+router.put("/:cursoId/category", modifyCategory);
 
 module.exports = router;

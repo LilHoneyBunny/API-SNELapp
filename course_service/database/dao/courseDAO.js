@@ -33,6 +33,19 @@ const generateJoinCode = (length = 7) => {
     return code;
 };
 
+const getCourseCategory = async (courseId) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [rows] = await dbConnection.execute(
+            `SELECT category FROM Curso WHERE cursoId = ?`,
+            [courseId]
+        );
+        return rows[0] || null;
+    } finally {
+        dbConnection.release();
+    }
+};
+
 const updateCourseDetails = async (cursoId, details) => {
     const dbConnection = await connection.getConnection();
     try {
@@ -164,6 +177,72 @@ const joinCourse = async (studentUserId, joinCode) => {
     }
 };
 
+const getCoursesByStudent = async (studentId) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [rows] = await dbConnection.execute(
+            `SELECT curso.name, curso.description, curso.category, curso.startDate, curso.endDate, curso.state FROM Curso curso 
+            INNER JOIN Curso_Student student_course ON curso.cursoId = student_course.cursoId WHERE student_course.studentUserId = ? AND state = 'Activo' `,
+            [studentId]
+        );
+        return rows;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+const getCoursesByName = async (name) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [rows] = await dbConnection.execute(
+            `SELECT * FROM Curso WHERE name LIKE ?`,
+            [`%${name}%`]
+        );
+        return rows;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+const getCoursesByCategory = async (category) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [rows] = await dbConnection.execute(
+            `SELECT * FROM Curso WHERE category = ?`,
+            [category]
+        );
+        return rows;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+const getCoursesByMonth = async (year, month) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [rows] = await dbConnection.execute(
+            `SELECT * FROM Curso WHERE YEAR(startDate) = ? AND MONTH(startDate) = ?`,
+            [year, month]
+        );
+        return rows;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+const getCoursesByState = async (state) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [rows] = await dbConnection.execute(
+            `SELECT * FROM Curso WHERE state = ?`,
+            [state]
+        );
+        return rows;
+    } finally {
+        dbConnection.release();
+    }
+};
+
 const removeStudentFromCourse = async (cursoId, studentUserId) => {
     const dbConnection = await connection.getConnection();
     try {
@@ -183,6 +262,19 @@ const removeStudentFromCourse = async (cursoId, studentUserId) => {
     }
 };
 
+const updateCourseCategory = async (courseId, newCategory) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [result] = await dbConnection.execute(
+            `UPDATE Curso SET category = ? WHERE cursoId = ?`,
+            [newCategory, courseId]
+        );
+        return result.affectedRows > 0; // true si se actualizó, false si no
+    } finally {
+        dbConnection.release();
+    }
+};
+
 module.exports = {
     createCourse,
     updateCourseDetails,
@@ -190,5 +282,12 @@ module.exports = {
     getCourseById,
     getAllCoursesByInstructor,
     joinCourse,
-    removeStudentFromCourse
+    getCoursesByStudent,
+    getCoursesByName,
+    getCoursesByCategory,
+    getCoursesByMonth,
+    getCoursesByState,
+    removeStudentFromCourse,
+    getCourseCategory,
+    updateCourseCategory
 };
