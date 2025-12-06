@@ -27,6 +27,7 @@ class Server {
 
     routes() {
         this.app.use("/minao_systems/quizzes", require('../routes/quizRoutes'));
+        this.app.use("/minao_systems/scores", require('../routes/scoreRoutes'));
         this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
     }
 
