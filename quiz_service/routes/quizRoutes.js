@@ -1,6 +1,6 @@
 const {Router} = require ('express');
 const router = Router();
-const {createQuestionnaire, updateQuestionnaire} = require('../controller/quizController');
+const {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire} = require('../controller/quizController');
 
 /**
  * @swagger
@@ -85,5 +85,32 @@ router.post('/createQuiz', createQuestionnaire);
  *         description: Internal server error
  */
 router.put("/updateQuiz/:quizId", updateQuestionnaire);
+
+/**
+ * @swagger
+ * /quizzes/deleteQuiz/{quizId}:
+ *   delete:
+ *     summary: Delete a quiz including its questions and options
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the quiz to delete
+ *     responses:
+ *       200:
+ *         description: Quiz deleted successfully
+ *       400:
+ *         description: Bad request (quizId missing)
+ *       404:
+ *         description: Quiz not found
+ *       500:
+ *         description: Internal server error
+ */
+router.delete("/deleteQuiz/:quizId", deleteQuestionnaire);
+
 
 module.exports = router;

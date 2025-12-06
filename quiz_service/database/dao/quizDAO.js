@@ -110,5 +110,19 @@ const updateQuiz = async (quizId, details) => {
     }
 };
 
-
-module.exports = {createQuiz, updateQuiz};
+const deleteQuiz = async (quizId) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [result] = await dbConnection.execute(
+            `DELETE FROM Quiz WHERE quizId = ?`,
+            [quizId]
+        );
+        return result;
+    } catch (error) {
+        console.error("Error deleting quiz:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
+module.exports = {createQuiz, updateQuiz, deleteQuiz};
