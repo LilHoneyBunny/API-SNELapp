@@ -1,5 +1,4 @@
 const { request, response } = require("express");
-const path = require('path');
 const { createCourse, updateCourseState, updateCourseDetails, getAllCoursesByInstructor, getCourseById, removeStudentFromCourse,
     joinCourse, getCoursesByStudent, getCoursesByName, getCoursesByCategory, getCoursesByMonth, getCoursesByState,
     getCourseCategory, updateCourseCategory } = require("../database/dao/courseDAO");
@@ -218,7 +217,7 @@ const unenrollStudentFromCourse = async (req, res = response) => {
     }
 };
 
-// Search courses by name
+
 const getCoursesByNameController = async (req, res = response) => {
     const { name } = req.query;
 
@@ -241,7 +240,7 @@ const getCoursesByNameController = async (req, res = response) => {
     }
 };
 
-// Search courses by category
+
 const getCoursesByCategoryController = async (req, res = response) => {
     const { category } = req.query;
 
@@ -264,7 +263,7 @@ const getCoursesByCategoryController = async (req, res = response) => {
     }
 };
 
-// Deactivate course
+
 const deactivateCourse = async (req, res = response) => {
     const { id } = req.params;
 
@@ -438,21 +437,6 @@ const modifyCategory = async (req, res) => {
     }
 };
 
-module.exports = { 
-    createCurso, 
-    updateCourse, 
-    setCourseState, 
-    getCourseDetailById, 
-    getCoursesByInstructor, 
-    joinCurso, 
-    getCoursesByStudentController, 
-    getCoursesByNameController, 
-    getCoursesByCategoryController, 
-    getCoursesByMonthController, 
-    getCoursesByStateController, 
-    deleteStudentFromCourse, 
-    deactivateCourse, 
-    unenrollStudentFromCourse,
-    getCategory,
-    modifyCategory
-};
+module.exports = { createCurso, updateCourse, setCourseState, getCourseDetailById, getCoursesByInstructor, joinCurso, getCoursesByStudentController, getCoursesByNameController, 
+    getCoursesByCategoryController, getCoursesByMonthController, getCoursesByStateController, deleteStudentFromCourse, deactivateCourse, unenrollStudentFromCourse,
+    getCategory,modifyCategory};

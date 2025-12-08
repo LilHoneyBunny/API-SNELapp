@@ -15,4 +15,23 @@ const getStudentNames = async (studentIds) => {
     }
 };
 
-module.exports = { getStudentNames };
+const updateStudentAverageInUserService = async (studentId, average) => {
+    const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+    const url = `http://localhost:3000/minao_systems/students/${studentId}/average`;
+
+    try {
+        const res = await fetch(url, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ average })
+        });
+
+        if (!res.ok) throw new Error(`Failed to update average: ${res.statusText}`);
+        return await res.json();
+    } catch (err) {
+        console.error("Error updating student average in user service:", err);
+        return null;
+    }
+};
+
+module.exports = { getStudentNames, updateStudentAverageInUserService };

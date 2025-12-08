@@ -172,7 +172,7 @@ const getStudentsByIds = async (studentIds) => {
 
         const placeholders = studentIds.map(() => '?').join(',');
         const [rows] = await dbConnection.execute(
-            `SELECT s.studentId, CONCAT(u.userName, ' ', u.paternalSurname, ' ', u.maternalSurname) AS name
+            `SELECT s.studentId, CONCAT(u.userName, ' ', u.paternalSurname, ' ', u.maternalSurname) AS name, s.average
              FROM Student s
              JOIN User u ON s.studentId = u.userId
              WHERE s.studentId IN (${placeholders})`,

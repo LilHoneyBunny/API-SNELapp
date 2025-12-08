@@ -1,6 +1,6 @@
 const { request, response } = require("express");
 const HttpStatusCodes = require('../utils/enums');
-const {getStudentById, updateStudentAverage} = require("../database/dao/studentDAO");
+const {getStudentById, updateStudentAverage, getStudentsWithAverageInCourse} = require("../database/dao/studentDAO");
 
 const getStudent = async (req, res = response) => {
     const { studentId } = req.params;
@@ -40,4 +40,5 @@ const updateAverage = async (req, res) => {
         res.status(500).json({ success: false, message: "Error updating average" });
     }
 };
+
 module.exports = {getStudent, updateAverage};

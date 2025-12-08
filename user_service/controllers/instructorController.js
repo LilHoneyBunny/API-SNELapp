@@ -1,8 +1,5 @@
 const { request, response } = require("express");
-const e = require ("express");
-const path = require('path');
 const HttpStatusCodes = require('../utils/enums');
-const { count } = require("console");
 const {getInstructorById} = require("../database/dao/instructorDAO");
 
 const getInstructor = async (req, res = response) => {
