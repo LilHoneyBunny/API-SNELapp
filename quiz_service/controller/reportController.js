@@ -2,6 +2,8 @@ const {buildStudentCourseReportData} = require("../utils/reportService");
 const {generateStudentCourseHTML} = require("../utils/htmlReportService");
 const { generateStudentReportPDF } = require("../utils/pdfService");
 const { sendReportEmail } = require("../utils/emailService");
+const { fetchStudentQuizResults } = require('../database/dao/reportDAO');
+const HttpStatusCodes = require ("../utils/enums");
 const path = require("path");
 
 async function getStudentCourseReport(req, res) {
@@ -9,14 +11,6 @@ async function getStudentCourseReport(req, res) {
     const { studentUserId, cursoId } = req.params;
 
     const data = await buildStudentCourseReportData(studentUserId, cursoId);
-    console.log("DEBUG final report data:", {
-        student: data.student,
-        course: data.course,
-        quizResultsLength: data.quizResults.length,
-        perfChartStart: (data.performanceChart || "").slice(0,20),
-        corrChartStart: (data.correctIncorrectChart || "").slice(0,20),
-        instructorEmail: data.course.instructorEmail
-    });
     const html = generateStudentCourseHTML(data);
 
     const pdfPath = path.join(__dirname, "../reports/studentReport.pdf");
@@ -29,24 +23,56 @@ async function getStudentCourseReport(req, res) {
             pdfPath
     );
 
-        
-    return res.status(200).send(html);
+    return res.status(HttpStatusCodes.OK).send(html);
   } catch (err) {
     console.error("getStudentCourseReport error:", err.message);
 
     if (err.message?.startsWith("STUDENT_SERVICE_ERROR")) {
-      return res.status(502).json({ error: "Student service error", detail: err.message });
+      return res.status(HttpStatusCodes.BAD_GATEWAY).json({ error: "Student service error", detail: err.message });
     }
     if (err.message?.startsWith("COURSE_SERVICE_ERROR")) {
-      return res.status(502).json({ error: "Course service error", detail: err.message });
+      return res.status(HttpStatusCodes.BAD_GATEWAY).json({ error: "Course service error", detail: err.message });
     }
     if (err.message?.startsWith("QUIZ_SERVICE_ERROR")) {
-      return res.status(502).json({ error: "Quiz service error", detail: err.message });
+      return res.status(HttpStatusCodes.BAD_GATEWAY).json({ error: "Quiz service error", detail: err.message });
     }
-    return res.status(500).json({ error: "Error generating student report", detail: err.message });
+    return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({ error: "Error generating student report", detail: err.message });
   }
 }
 
+const getStudentQuizResults = async (req, res) => {
+    try {
+        const { quizId, studentUserId } = req.params;
 
-module.exports = {getStudentCourseReport};
+        if (!quizId || !studentUserId) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                success: false,
+                message: "quizId and studentUserId are required"
+            });
+        }
+
+        const result = await fetchStudentQuizResults(quizId, studentUserId);
+
+        if (!result) {
+            return res.status(HttpStatusCodes.NOT_FOUND).json({
+                success: false,
+                message: "Quiz results not found"
+            });
+        }
+
+        return res.status(HttpStatusCodes.OK).json({
+            success: true,
+            data: result
+        });
+
+    } catch (err) {
+        console.error("getStudentQuizResults Controller Error:", err);
+        res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Error getting quiz results"
+        });
+    }
+};
+
+module.exports = {getStudentCourseReport, getStudentQuizResults};
 

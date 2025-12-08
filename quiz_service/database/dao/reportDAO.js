@@ -11,7 +11,6 @@ async function fetchStudentInfo(studentId) {
   try {
     const url = `${process.env.USERS_SERVICE_URL}/students/report-info/${studentId}`;
     const res = await axiosInstance.get(url);
-    console.log(studentId)
     return res.data;
   } catch (err) {
     console.error("Error fetching student info:", err.message);
@@ -23,9 +22,7 @@ async function fetchStudentInfo(studentId) {
 async function fetchCourseInfo(courseId) {
   try {
     const url = `${process.env.COURSES_SERVICE_URL}/instructor/${courseId}/instructor`;
-    console.log("COURSES_SERVICE_URL:", process.env.COURSES_SERVICE_URL);
     const res = await axiosInstance.get(url);
-    console.log(courseId);
     return res.data;
   } catch (err) {
     console.error("Error fetching course info:", err.message);
@@ -34,92 +31,109 @@ async function fetchCourseInfo(courseId) {
   }
 }
 
-async function fetchStudentQuizResults(quizId, studentUserId) { //?? <- aún me falta ver lo de las graficas con estos datos
+async function fetchQuizzesByCourse(courseId) {
+  const dbConnection = await connection.getConnection();
+  try {
+    const [rows] = await dbConnection.execute(
+      `SELECT quizId, title, weighing, status FROM Quiz WHERE cursoId = ?`,
+      [courseId]
+    );
+    return rows;
+  } finally {
+    dbConnection.release();
+  }
+}
+
+async function fetchStudentQuizResults(courseId, studentUserId) { 
   const dbConnection = await connection.getConnection();
   try {
     const [quizRows] = await dbConnection.execute(
-      `SELECT quizId, title, weighing 
-       FROM Quiz 
-       WHERE quizId = ?`,
-      [quizId]
-    );
-    if (!quizRows.length) return null;
-
-    const quiz = quizRows[0];
-
-    const [[attemptRow]] = await dbConnection.execute(
-      `SELECT MAX(attemptNumber) AS maxAttempt 
-       FROM StudentResponse 
-       WHERE quizId = ? AND studentUserId = ?`,
-      [quizId, studentUserId]
+      `SELECT quizId, title, weighing, creationDate
+       FROM Quiz
+       WHERE cursoId = ?`,
+      [courseId]
     );
 
-    const maxAttempt = attemptRow?.maxAttempt;
+    if (!quizRows.length) return [];
 
-    if (!maxAttempt) {
-      return {
+    const results = [];
+
+    for (const quiz of quizRows) {
+      const [[scoreRow]] = await dbConnection.execute(
+        `SELECT score, attemptNumber, createdAt
+         FROM Score
+         WHERE quizId = ? AND studentUserId = ?
+         ORDER BY attemptNumber DESC
+         LIMIT 1`,
+        [quiz.quizId, studentUserId]
+      );
+
+      let questions = [];
+      let maxAttempt = null;
+      let scoreObtained = 0;
+      let creationDate = quiz.creationDate;
+
+      if (scoreRow) {
+        maxAttempt = scoreRow.attemptNumber;
+        scoreObtained = scoreRow.score;
+        creationDate = scoreRow.createdAt || creationDate;
+
+        const [questionsRows] = await dbConnection.execute(
+          `SELECT 
+              q.questionId, q.questionText, q.points,
+              oa.optionId, oa.optionText, oa.isCorrect,
+              sr.optionId AS selectedOptionId,
+              CASE WHEN sr.isCorrect = 1 THEN q.points ELSE 0 END AS earnedPoints
+           FROM Question q
+           JOIN OptionAnswer oa ON oa.questionId = q.questionId
+           LEFT JOIN StudentResponse sr 
+             ON sr.questionId = q.questionId
+            AND sr.quizId = ?
+            AND sr.studentUserId = ?
+            AND sr.attemptNumber = ?
+           WHERE q.quizId = ?
+           ORDER BY q.questionId, oa.optionId`,
+          [quiz.quizId, studentUserId, maxAttempt, quiz.quizId]
+        );
+
+        const questionsMap = {};
+        for (const row of questionsRows) {
+          if (!questionsMap[row.questionId]) {
+            questionsMap[row.questionId] = {
+              questionId: row.questionId,
+              questionText: row.questionText,
+              points: row.points,
+              options: [],
+              selectedOptionId: row.selectedOptionId,
+              earnedPoints: row.earnedPoints || 0
+            };
+          }
+          questionsMap[row.questionId].options.push({
+            optionId: row.optionId,
+            optionText: row.optionText,
+            isCorrect: row.isCorrect
+          });
+        }
+
+        questions = Object.values(questionsMap);
+      }
+
+      results.push({
         quizId: quiz.quizId,
         title: quiz.title,
         totalWeighing: quiz.weighing,
-        scoreObtained: 0,
-        attemptNumber: null,
-        questions: []
-      };
-    }
-
-    const [questionsRows] = await dbConnection.execute(
-      `SELECT 
-          q.questionId, q.questionText, q.points,
-          oa.optionId, oa.optionText, oa.isCorrect,
-          sr.optionId AS selectedOptionId,
-          CASE WHEN sr.isCorrect = 1 THEN q.points ELSE 0 END AS earnedPoints
-       FROM Question q
-       JOIN OptionAnswer oa ON oa.questionId = q.questionId
-       LEFT JOIN StudentResponse sr 
-         ON sr.questionId = q.questionId
-        AND sr.quizId = ?
-        AND sr.studentUserId = ?
-        AND sr.attemptNumber = ?
-       WHERE q.quizId = ?
-       ORDER BY q.questionId, oa.optionId`,
-      [quizId, studentUserId, maxAttempt, quizId]
-    );
-
-    const questionsMap = {};
-    for (const row of questionsRows) {
-      if (!questionsMap[row.questionId]) {
-        questionsMap[row.questionId] = {
-          questionId: row.questionId,
-          questionText: row.questionText,
-          points: row.points,
-          options: [],
-          selectedOptionId: row.selectedOptionId,
-          earnedPoints: row.earnedPoints || 0
-        };
-      }
-
-      questionsMap[row.questionId].options.push({
-        optionId: row.optionId,
-        optionText: row.optionText,
-        isCorrect: row.isCorrect
+        creationDate,
+        scoreObtained,
+        attemptNumber: maxAttempt || 0,
+        questions
       });
     }
 
-    const totalScore = Object.values(questionsMap)
-      .reduce((sum, q) => sum + (q.earnedPoints || 0), 0);
-
-    return {
-      quizId: quiz.quizId,
-      title: quiz.title,
-      totalWeighing: quiz.weighing,
-      scoreObtained: totalScore,
-      attemptNumber: maxAttempt,
-      questions: Object.values(questionsMap)
-    };
+    return results;
 
   } finally {
     dbConnection.release();
   }
 }
 
-module.exports = {fetchStudentInfo, fetchCourseInfo,fetchStudentQuizResults};
+module.exports = {fetchStudentInfo, fetchCourseInfo,fetchQuizzesByCourse, fetchStudentQuizResults};

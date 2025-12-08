@@ -7,7 +7,6 @@ function formatDate(dateString) {
   if (!dateString) return "N/A";
   const d = new Date(dateString);
   if (isNaN(d.getTime())) return "N/A";
-
   return d.toLocaleDateString("es-MX", {
     day: "2-digit",
     month: "2-digit",
@@ -19,22 +18,14 @@ function formatDate(dateString) {
 async function buildStudentCourseReportData(studentId, courseId) {
   try {
     const studentInfoRaw = await fetchStudentInfo(studentId);
-    console.log("DEBUG studentInfoRaw:", studentInfoRaw);
-
-    const studentObj = Array.isArray(studentInfoRaw)
-      ? studentInfoRaw[0]
-      : (studentInfoRaw || {});
-
+    const studentObj = Array.isArray(studentInfoRaw) ? studentInfoRaw[0] : (studentInfoRaw || {});
     const student = {
       fullName: studentObj?.name || studentObj?.fullName || "Desconocido",
       average: studentObj?.average ?? studentObj?.avg ?? "N/A"
     };
 
     const courseInfoRaw = await fetchCourseInfo(courseId);
-    console.log("DEBUG courseInfoRaw:", courseInfoRaw);
-
     let courseData = null;
-
     if (courseInfoRaw?.result && Array.isArray(courseInfoRaw.result)) {
       courseData = courseInfoRaw.result[0];
     } else if (courseInfoRaw?.course && Array.isArray(courseInfoRaw.course)) {
@@ -46,60 +37,46 @@ async function buildStudentCourseReportData(studentId, courseId) {
     }
 
     const instructorArr = ensureArray(courseInfoRaw?.instructor || courseInfoRaw?.instructors);
-
     const course = {
       name: courseData?.name || "Desconocido",
       category: courseData?.category || "N/A",
       startDate: courseData?.startDate || null,
       endDate: courseData?.endDate || null,
-      instructorName:
-        instructorArr?.[0]?.name ||
-        courseData?.instructorName ||
-        "Desconocido",
-      instructorEmail:
-        instructorArr?.[0]?.email ||
-        courseData?.instructorEmail ||
-        null,
-      quizzes: ensureArray(courseData?.quizzes || courseInfoRaw?.quizzes)
+      instructorName: instructorArr?.[0]?.name || courseData?.instructorName || "Desconocido",
+      instructorEmail: instructorArr?.[0]?.email || courseData?.instructorEmail || null
     };
 
-    const quizResults = [];
+    const quizResults = await fetchStudentQuizResults(courseId, studentId);
+
+    const normalizedQuizResults = quizResults.map(res => ({
+      title: res.title || "Cuestionario",
+      score: parseFloat(res.scoreObtained || 0),
+      correct: res.questions?.filter(q => q.earnedPoints === q.points).length || 0,
+      incorrect: res.questions?.filter(q => q.earnedPoints < q.points).length || 0,
+      date: formatDate(res.creationDate),
+      attempts: res.attemptNumber || 0
+    }));
+
+
+    const performanceChart = await createPerformanceChart(normalizedQuizResults);
+    const correctIncorrectChart = await createCorrectIncorrectChart(normalizedQuizResults);
+
     const hasQuizzes = quizResults.length > 0;
-
-    for (const quiz of course.quizzes) {
-      const res = await fetchStudentQuizResults(quiz.quizId, studentId);
-      if (res) quizResults.push(res);
-    }
-
-    console.log("DEBUG quizResults length:", quizResults.length);
-
-    const performanceDataUrl = await createPerformanceChart(quizResults);
-    const correctIncorrectDataUrl = await createCorrectIncorrectChart(quizResults);
-
-    function normalizeDataUrl(dataUrl) {
-      if (!dataUrl) return "";
-      if (dataUrl.startsWith("data:")) {
-        return dataUrl.slice(dataUrl.indexOf(",") + 1);
-      }
-      return dataUrl;
-    }
-
-    const performanceChart = normalizeDataUrl(performanceDataUrl);
-    const correctIncorrectChart = normalizeDataUrl(correctIncorrectDataUrl);
 
     return {
       student,
       course: {
         ...course,
+        quizzes: normalizedQuizResults,
         startDateFormatted: formatDate(course.startDate),
         endDateFormatted: formatDate(course.endDate)
       },
-      quizResults,
-      performanceChart,         
-      correctIncorrectChart,    
+      quizResults, 
+      performanceChart,
+      correctIncorrectChart,
       generatedAt: new Date().toLocaleString(),
-      courseStart: formatDate(course.startDate), 
-      courseEnd: formatDate(course.endDate),      
+      courseStart: formatDate(course.startDate),
+      courseEnd: formatDate(course.endDate),
       hasQuizzes
     };
 

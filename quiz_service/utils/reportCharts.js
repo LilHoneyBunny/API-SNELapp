@@ -49,7 +49,7 @@ async function createCorrectIncorrectChart(quizzes) {
             datasets: [
                 {
                     data: [correct, incorrect],
-                    backgroundColor: ["#2ECC40", "#FF4136"]
+                    backgroundColor: ["#3C507D", "#D5B893"]
                 }
             ]
         },

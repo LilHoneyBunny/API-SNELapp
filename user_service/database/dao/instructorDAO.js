@@ -44,7 +44,6 @@ const getInstructorId = async (instructorId) => {
         if (!instructorId || instructorId.length === 0) return [];
 
         const placeholders = instructorId.map(() => '?').join(',');
-        console.log("Fetching instructors with IDs:", instructorId);
         const [rows] = await dbConnection.execute(
             `SELECT i.instructorId , CONCAT(u.userName, ' ', u.paternalSurname, ' ', u.maternalSurname) AS name, u.email, u.userType
              FROM Instructor i

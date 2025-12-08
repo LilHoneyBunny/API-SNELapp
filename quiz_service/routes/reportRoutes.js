@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getStudentCourseReport} = require('../controller/reportController');
+const { getStudentCourseReport, getStudentQuizResults} = require('../controller/reportController');
 
 /**
  * @swagger
@@ -38,5 +38,35 @@ const { getStudentCourseReport} = require('../controller/reportController');
  *         description: Error al generar el reporte
  */
 router.get('/student/:studentUserId/course/:cursoId', getStudentCourseReport);
+
+/**
+ * @swagger
+ * /report/{quizId}/students/{studentUserId}/results:
+ *   get:
+ *     summary: Obtiene los resultados detallados de un estudiante en un quiz
+ *     tags: [Quiz Results]
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: studentUserId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Resultados obtenidos correctamente
+ *       400:
+ *         description: Parámetros faltantes
+ *       404:
+ *         description: Resultados no encontrados
+ *       500:
+ *         description: Error interno
+ */
+router.get('/:quizId/students/:studentUserId/results', getStudentQuizResults);
+
 
 module.exports = router;

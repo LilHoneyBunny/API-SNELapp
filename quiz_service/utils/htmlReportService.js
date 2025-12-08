@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
-const logoPath = path.join(__dirname,"quiz_service/utils/templates/minao_logo.png");
+
+const logoPath = path.join(__dirname, "templates/minao_logo.png");
 const base64Logo = fs.existsSync(logoPath) ? fs.readFileSync(logoPath).toString("base64") : "";
 
 function compileTemplate(templateName, data) {
@@ -31,17 +32,18 @@ function ensureDataImagePrefix(base64) {
 }
 
 function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("es-MX", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        timeZone: "UTC"
-    });
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("es-MX", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "UTC"
+  });
 }
 
 function generateStudentCourseHTML(data) {
-  const quizRowsHtml = generateQuizRows(data.quizResults || []);
+  const quizRowsHtml = generateQuizRows(data.course?.quizzes || []);
   const performanceChart = ensureDataImagePrefix(data.performanceChart);
   const correctIncorrectChart = ensureDataImagePrefix(data.correctIncorrectChart);
 
@@ -63,4 +65,3 @@ function generateStudentCourseHTML(data) {
 }
 
 module.exports = { generateStudentCourseHTML };
-
