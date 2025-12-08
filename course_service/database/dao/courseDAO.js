@@ -269,7 +269,25 @@ const updateCourseCategory = async (courseId, newCategory) => {
             `UPDATE Curso SET category = ? WHERE cursoId = ?`,
             [newCategory, courseId]
         );
-        return result.affectedRows > 0; // true si se actualizó, false si no
+        return result.affectedRows > 0; 
+    } finally {
+        dbConnection.release();
+    }
+};
+
+const getCourseReportInfoDAO = async (courseId) =>{
+    const dbConnection = await connection.getConnection();
+    try {
+        const [rows] = await dbConnection.execute(
+            `SELECT cursoId, name, category, startDate, endDate, instructorUserId 
+             FROM Curso 
+             WHERE cursoId = ?`,
+            [courseId]
+        );
+        return rows[0];
+    } catch (error) {
+        console.error("DAO Error in getCourseReportInfoDAO:", error);
+        throw error;
     } finally {
         dbConnection.release();
     }
@@ -277,5 +295,5 @@ const updateCourseCategory = async (courseId, newCategory) => {
 
 module.exports = {createCourse, updateCourseDetails, updateCourseState, getCourseById, getAllCoursesByInstructor, joinCourse,
     getCoursesByStudent, getCoursesByName, getCoursesByCategory, getCoursesByMonth, getCoursesByState, removeStudentFromCourse,
-    getCourseCategory, updateCourseCategory
+    getCourseCategory, updateCourseCategory, getCourseReportInfoDAO
 };

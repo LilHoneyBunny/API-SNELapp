@@ -1,6 +1,6 @@
 const { request, response } = require("express");
 const HttpStatusCodes = require('../utils/enums');
-const {getInstructorById} = require("../database/dao/instructorDAO");
+const {getInstructorById, getInstructorId} = require("../database/dao/instructorDAO");
 
 const getInstructor = async (req, res = response) => {
     const { instructorId } = req.params;
@@ -27,4 +27,18 @@ const getInstructor = async (req, res = response) => {
     }
 };
 
-module.exports = {getInstructor};
+const fetchInstructor = async (req, res) => {
+    try {
+        const { ids } = req.query;
+        if (!ids) return res.status(400).json({ success: false, message: "Missing ids parameter" });
+
+        const InstructorId = ids.split(',').map(id => parseInt(id));
+        const instructor = await getInstructorId(InstructorId);
+
+        res.status(200).json({ success: true, instructor });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Error obtaining instructor" });
+    }
+};
+
+module.exports = {getInstructor, fetchInstructor};

@@ -62,4 +62,28 @@ const updateStudentAverage = async (studentId, average) => {
     }
 };
 
-module.exports = { getStudentById, updateStudentProfile, updateStudentAverage };
+async function getStudentReportInfoDAO(studentId) {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [rows] = await dbConnection.execute(
+            `SELECT 
+                u.userId,
+                CONCAT(u.userName, ' ', u.paternalSurname, ' ', u.maternalSurname) AS fullName,
+                u.email,
+                s.average
+            FROM User u
+            JOIN Student s ON u.userId = s.studentId
+            WHERE u.userId = ?`,
+            [studentId]
+        );
+
+        return rows[0] || null;
+    } catch (error) {
+        console.error("Error in getStudentReportInfoDAO:", error);
+        throw new Error("DATABASE_ERROR");
+    }finally {
+        dbConnection.release();
+    }
+}
+
+module.exports = { getStudentById, updateStudentProfile, updateStudentAverage, getStudentReportInfoDAO };

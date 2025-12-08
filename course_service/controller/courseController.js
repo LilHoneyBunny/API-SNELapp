@@ -1,7 +1,9 @@
 const { request, response } = require("express");
+const axios = require('axios');
+const USERS_SERVICE_URL = process.env.USERS_SERVICE_URL
 const { createCourse, updateCourseState, updateCourseDetails, getAllCoursesByInstructor, getCourseById, removeStudentFromCourse,
     joinCourse, getCoursesByStudent, getCoursesByName, getCoursesByCategory, getCoursesByMonth, getCoursesByState,
-    getCourseCategory, updateCourseCategory } = require("../database/dao/courseDAO");
+    getCourseCategory, updateCourseCategory, getCourseReportInfoDAO } = require("../database/dao/courseDAO");
 const HttpStatusCodes = require('../utils/enums');
 
 
@@ -437,6 +439,37 @@ const modifyCategory = async (req, res) => {
     }
 };
 
+const getCourseReportInfo = async (req, res) => {
+    const { courseId } = req.params;
+    try {
+        const courseData = await getCourseReportInfoDAO(courseId);
+
+        if (!courseData) return res.status(404).json({ error: "Course not found" });
+
+        let instructorData = {};
+        if (courseData.instructorUserId) {
+            try {
+                const response = await axios.get(`${USERS_SERVICE_URL}/${courseData.instructorUserId}`);
+                instructorData = response.data.result[0]; 
+            } catch (err) {
+                console.error("Error fetching instructor info:", err.message);
+                instructorData = { userName: 'Unknown', paternalSurname: '', maternalSurname: '', biography: '', titleName: '' };
+            }
+        }
+
+        const fullCourseReport = {
+            ...courseData,
+            instructor: instructorData
+        };
+
+        res.json(fullCourseReport);
+
+    } catch (error) {
+        console.error("Controller Error in getCourseReportInfo:", error);
+        res.status(500).json({ error: "COURSE_SERVICE_ERROR", detail: error.message });
+    }
+};
+
 module.exports = { createCurso, updateCourse, setCourseState, getCourseDetailById, getCoursesByInstructor, joinCurso, getCoursesByStudentController, getCoursesByNameController, 
     getCoursesByCategoryController, getCoursesByMonthController, getCoursesByStateController, deleteStudentFromCourse, deactivateCourse, unenrollStudentFromCourse,
-    getCategory,modifyCategory};
+    getCategory,modifyCategory, getCourseReportInfo};

@@ -323,11 +323,6 @@ router.get('/:quizId/responses', listQuizResponses);
  *         schema:
  *           type: integer
  *         required: true
- *       - in: query
- *         name: attemptNumber
- *         schema:
- *           type: integer
- *         required: true
  *     responses:
  *       200:
  *         description: Resultado del quiz

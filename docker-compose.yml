@@ -42,8 +42,23 @@ services:
     volumes:
       - quizzes_data:/var/lib/mysql
       - ./quiz_service/script/script.sql:/docker-entrypoint-initdb.d/script.sql
+  
+  mysql_chat:
+    image: mysql:8.0
+    container_name: mysql_chat
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_CHAT_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_CHAT_DB}
+      MYSQL_USER: ${MYSQL_CHAT_USER}
+      MYSQL_PASSWORD: ${MYSQL_CHAT_PASSWORD}
+    ports:
+      - "3310:3306"
+    volumes:
+      - quizzes_data:/var/lib/mysql
+      - ./chat_service/script/script.sql:/docker-entrypoint-initdb.d/script.sql
 
 volumes:
   users_data:
   courses_data:
   quizzes_data:
+  chat_data:

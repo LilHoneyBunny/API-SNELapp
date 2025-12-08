@@ -38,4 +38,29 @@ const updateInstructorProfile = async (instructorId, { titleId, biography }) => 
     }
 };
 
-module.exports = { getInstructorById, updateInstructorProfile };
+const getInstructorId = async (instructorId) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        if (!instructorId || instructorId.length === 0) return [];
+
+        const placeholders = instructorId.map(() => '?').join(',');
+        console.log("Fetching instructors with IDs:", instructorId);
+        const [rows] = await dbConnection.execute(
+            `SELECT i.instructorId , CONCAT(u.userName, ' ', u.paternalSurname, ' ', u.maternalSurname) AS name, u.email, u.userType
+             FROM Instructor i
+             JOIN User u ON i.instructorId  = u.userId
+             WHERE i.instructorId IN (${placeholders})`,
+            instructorId
+        );
+
+        return rows; 
+    } catch (err) {
+        console.error("Error in getInstructorId  DAO:", err);
+        return instructorId.map(id => ({ instructorId: id, name: "Desconocido" }));
+    } finally {
+        dbConnection.release();
+    }
+};
+
+
+module.exports = { getInstructorById, updateInstructorProfile, getInstructorId  };
