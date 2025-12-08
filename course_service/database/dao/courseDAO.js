@@ -133,7 +133,7 @@ const getAllCoursesByInstructor = async (instructorUserId) => {
     const dbConnection = await connection.getConnection();
     try {
         const [rows] = await dbConnection.execute(
-            `SELECT name, description, category, startDate, endDate, state FROM Curso WHERE instructorUserId = ? AND state = 'Activo' `,
+            `SELECT cursoId, name, description, category, startDate, endDate, state FROM Curso WHERE instructorUserId = ? AND state = 'Activo' `,
             [instructorUserId]
         );
 
