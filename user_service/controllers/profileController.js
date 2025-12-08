@@ -4,6 +4,7 @@ const fs = require("fs");
 const sharp = require("sharp");
 const HttpStatusCodes = require("../utils/enums");
 
+// ✔ Importación CORRECTA según tu DAO
 const { updateUserBasicProfile } = require("../database/dao/userDAO");
 const { updateInstructorProfile } = require("../database/dao/instructorDAO");
 const { updateStudentProfile } = require("../database/dao/studentDAO");
@@ -11,7 +12,7 @@ const { updateStudentProfile } = require("../database/dao/studentDAO");
 // misma regex que usas en userController
 const validateName = /^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ ]{1,69}$/;
 
-// Títulos mapeados a Title.titleId según tu inserción inicial
+// Títulos mapeados a Title.titleId
 const TITLE_MAP = {
     "Dr.": 1,
     "Mtro.": 2,
@@ -34,16 +35,13 @@ const processProfileImage = async (file) => {
     const outputFileName = `${fileNameWithoutExt}.jpg`;
     const outputPath = path.join(avatarsDir, outputFileName);
 
-    // Resize 480p (16:9)
     await sharp(file.path)
         .resize({ width: 854, height: 480, fit: "cover" })
         .jpeg({ quality: 90 })
         .toFile(outputPath);
 
-    // eliminar temporal
     fs.unlink(file.path, () => {});
 
-    // ruta pública para frontend
     return `/avatars/${outputFileName}`;
 };
 
@@ -58,6 +56,7 @@ const updateUserProfileController = async (req, res) => {
     try {
         const profileImageUrl = await processProfileImage(req.file);
 
+        // ✔ ahora sí llama a la función correcta
         await updateUserBasicProfile(id, {
             userName,
             paternalSurname,
@@ -80,7 +79,6 @@ const updateUserProfileController = async (req, res) => {
 
 /**
  * PUT /instructors/:id
- * Actualiza título profesional y biografía
  */
 const updateInstructorProfileController = async (req, res = response) => {
     const { id } = req.params;
@@ -122,7 +120,6 @@ const updateInstructorProfileController = async (req, res = response) => {
 
 /**
  * PUT /students/:id
- * Actualiza nivel educativo
  */
 const updateStudentProfileController = async (req, res = response) => {
     const { id } = req.params;

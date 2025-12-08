@@ -1,9 +1,13 @@
 const { Router } = require('express');
 const router = Router();
-const { registerUser, userLogin, verifyUser, fetchStudents} = require('../controllers/userController');
+
+const { registerUser, userLogin, verifyUser, fetchStudents } = require('../controllers/userController');
 const uploadProfileImage = require("../middleware/uploadProfileImage");
 const { verifyToken } = require('../middleware/authMiddleware');
-const { updateUserBasicProfile } = require("../controllers/profileController");
+
+// ✔ Importación corregida (el controlador correcto)
+const { updateUserProfileController } = require("../controllers/profileController");
+
 
 /**
  * @swagger
@@ -35,6 +39,7 @@ const { updateUserBasicProfile } = require("../controllers/profileController");
  */
 router.post('/registerUser', registerUser);
 
+
 /**
  * @swagger
  * /users/login:
@@ -62,6 +67,7 @@ router.post('/registerUser', registerUser);
  */
 router.post('/login', userLogin);
 
+
 /**
  * @swagger
  * /users/verify:
@@ -88,6 +94,7 @@ router.post('/login', userLogin);
  *         description: Error interno del servidor
  */
 router.post('/verify', verifyUser);
+
 
 /**
  * @swagger
@@ -124,22 +131,26 @@ router.post('/verify', verifyUser);
  *         description: Error del servidor
  */
 router.put('/:id',
-  verifyToken,           // Asegura que el usuario está autenticado
-  uploadProfileImage,     // Subir la imagen de perfil
-  (req, res, next) => {
-      // Revisa que el usuario sea el dueño del perfil
-      const { id } = req.params;
-      if (parseInt(id, 10) !== req.user.userId) {
-          return res.status(403).json({
-              error: true,
-              statusCode: 403,
-              details: "You can only edit your own profile"
-          });
-      }
-      next();
-  },
-  updateUserBasicProfile // Controlador para actualizar el perfil
+    verifyToken,
+    uploadProfileImage,
+    (req, res, next) => {
+        const { id } = req.params;
+
+        // Validar que un usuario solo pueda modificar su propio perfil
+        if (parseInt(id, 10) !== req.user.userId) {
+            return res.status(403).json({
+                error: true,
+                statusCode: 403,
+                details: "You can only edit your own profile"
+            });
+        }
+
+        next();
+    },
+    // ✔ Controlador correcto para actualizar perfil
+    updateUserProfileController
 );
+
 
 /**
  * @swagger
