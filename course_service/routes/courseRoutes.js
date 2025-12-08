@@ -4,7 +4,7 @@ const router = Router();
 const {createCurso, setCourseState, updateCourse, getCourseDetailById, getCoursesByInstructor, joinCurso,
     getCoursesByStudentController, getCoursesByNameController, getCoursesByCategoryController, getCoursesByMonthController,
     getCoursesByStateController, deactivateCourse, unenrollStudentFromCourse, deleteStudentFromCourse, getCategory,
-    modifyCategory} = require('../controller/courseController');
+    modifyCategory, getCourseReportInfo} = require('../controller/courseController');
 
 const { verifyToken, requireInstructor, requireStudent } = require('../middleware/authMiddleware');
 
@@ -561,5 +561,29 @@ router.get("/:cursoId/category", getCategory);
  *         description: Course not found
  */
 router.put("/:cursoId/category", modifyCategory);
+
+/**
+ * @swagger
+ * /courses/{courseId}/report-info:
+ *   get:
+ *     summary: Obtiene información detallada del curso para generar reportes
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del curso
+ *     responses:
+ *       200:
+ *         description: Información del curso obtenida correctamente
+ *       404:
+ *         description: Curso no encontrado
+ *       500:
+ *         description: Error del servidor
+ */
+router.get("/:courseId/report-info", getCourseReportInfo);
+
 
 module.exports = router;

@@ -3,7 +3,7 @@ const connection = require("../pool");
 
 /**
  * DAO — Curso
- * Todas las validaciones de negocio (existencia, estado, duplicados) se hacen aquí.
+ * Compatible con la estructura SQL de minao_courses proporcionada por Lilly
  */
 
 /* -------------------------
@@ -34,7 +34,7 @@ const createCourse = async (course) => {
         course.startDate || null,
         course.endDate || null,
         validStates.includes(course.state) ? course.state : "Activo",
-        course.instructorUserId,
+        course.instructorUserId
       ]
     );
 
@@ -51,7 +51,6 @@ const createCourse = async (course) => {
 
 /* -------------------------
    Get Course by Id
-   returns single row or null
 --------------------------*/
 const getCourseById = async (cursoId) => {
   const db = await connection.getConnection();
@@ -86,23 +85,15 @@ const getAllCoursesByInstructor = async (instructorUserId) => {
 
 /* -------------------------
    Update course details
-   - Validates course exists
-   - If category provided, checks whether it is same as current (returns info)
-   - Allows partial updates
-   Returns: { affectedRows, updatedFields: [..], previous: {..}, current: {..} }
 --------------------------*/
 const updateCourseDetails = async (cursoId, details) => {
   const db = await connection.getConnection();
   try {
-    // 1) ensure course exists
     const course = await getCourseById(cursoId);
-    if (!course) {
-      return { found: false };
-    }
+    if (!course) return { found: false };
 
     const { name, description, category, endDate } = details;
 
-    // check there is something to update
     const fields = [];
     const values = [];
 
@@ -115,7 +106,6 @@ const updateCourseDetails = async (cursoId, details) => {
       values.push(description);
     }
     if (category && category !== course.category) {
-      // NOTE: category is free text in schema — we only check it's different
       fields.push("category = ?");
       values.push(category);
     }
@@ -133,7 +123,6 @@ const updateCourseDetails = async (cursoId, details) => {
 
     const [result] = await db.execute(query, values);
 
-    // fetch updated row
     const updated = await getCourseById(cursoId);
 
     return {
@@ -142,7 +131,7 @@ const updateCourseDetails = async (cursoId, details) => {
       affectedRows: result.affectedRows,
       previous: course,
       current: updated,
-      updatedFields: fields.map(f => f.split(" = ")[0]),
+      updatedFields: fields.map((f) => f.split(" = ")[0])
     };
   } catch (error) {
     console.error("updateCourseDetails error:", error);
@@ -154,42 +143,33 @@ const updateCourseDetails = async (cursoId, details) => {
 
 /* -------------------------
    Update course state
-   - Validates course exists
-   - Validates provided state is permitted
-   Returns: { found, updated, previousState, newState, affectedRows }
 --------------------------*/
 const updateCourseState = async (cursoId, newState) => {
   const db = await connection.getConnection();
   try {
     const course = await getCourseById(cursoId);
-    if (!course) {
-      return { found: false };
-    }
+    if (!course) return { found: false };
 
-    const state = validStates.includes(newState) ? newState : null;
-    if (!state) {
+    if (!validStates.includes(newState)) {
       return { found: true, updated: false, reason: "invalid_state", previousState: course.state };
     }
 
-    if (course.state === state) {
+    if (course.state === newState) {
       return { found: true, updated: false, reason: "same_state", previousState: course.state };
     }
 
     const [result] = await db.execute(
       `UPDATE Curso SET state = ? WHERE cursoId = ?`,
-      [state, cursoId]
+      [newState, cursoId]
     );
 
     return {
       found: true,
       updated: result.affectedRows > 0,
       previousState: course.state,
-      newState: state,
-      affectedRows: result.affectedRows,
+      newState,
+      affectedRows: result.affectedRows
     };
-  } catch (error) {
-    console.error("updateCourseState error:", error);
-    throw error;
   } finally {
     db.release();
   }
@@ -197,9 +177,8 @@ const updateCourseState = async (cursoId, newState) => {
 
 /* -------------------------
    Get courses by student
-   - returns list (could be empty)
 --------------------------*/
-const getCoursesByStudent = async (studentId) => {
+const getCoursesByStudent = async (studentUserId) => {
   const db = await connection.getConnection();
   try {
     const [rows] = await db.execute(
@@ -207,7 +186,7 @@ const getCoursesByStudent = async (studentId) => {
        FROM Curso c
        INNER JOIN Curso_Student cs ON c.cursoId = cs.cursoId
        WHERE cs.studentUserId = ?`,
-      [studentId]
+      [studentUserId]
     );
     return rows;
   } finally {
@@ -216,14 +195,14 @@ const getCoursesByStudent = async (studentId) => {
 };
 
 /* -------------------------
-   Get courses by name/category/month/state
-   - Basic parameter validation is left to controller, but DAO assumes proper types
+   Filters
 --------------------------*/
 const getCoursesByName = async (name) => {
   const db = await connection.getConnection();
   try {
     const [rows] = await db.execute(
-      `SELECT cursoId, name, description, category, startDate, endDate, state FROM Curso WHERE name LIKE ?`,
+      `SELECT cursoId, name, description, category, startDate, endDate, state 
+       FROM Curso WHERE name LIKE ?`,
       [`%${name}%`]
     );
     return rows;
@@ -236,7 +215,8 @@ const getCoursesByCategory = async (category) => {
   const db = await connection.getConnection();
   try {
     const [rows] = await db.execute(
-      `SELECT cursoId, name, description, category, startDate, endDate, state FROM Curso WHERE category = ?`,
+      `SELECT cursoId, name, description, category, startDate, endDate, state 
+       FROM Curso WHERE category = ?`,
       [category]
     );
     return rows;
@@ -248,9 +228,9 @@ const getCoursesByCategory = async (category) => {
 const getCoursesByMonth = async (year, month) => {
   const db = await connection.getConnection();
   try {
-    // DAO-level validation: ensure integers and realistic month/year
     const y = parseIntSafe(year);
     const m = parseIntSafe(month);
+
     if (!y || !m || m < 1 || m > 12) {
       return { error: "invalid_year_or_month", rows: [] };
     }
@@ -273,10 +253,13 @@ const getCoursesByState = async (state) => {
     if (!validStates.includes(state)) {
       return { error: "invalid_state", rows: [] };
     }
+
     const [rows] = await db.execute(
-      `SELECT cursoId, name, description, category, startDate, endDate, state FROM Curso WHERE state = ?`,
+      `SELECT cursoId, name, description, category, startDate, endDate, state
+       FROM Curso WHERE state = ?`,
       [state]
     );
+
     return { rows };
   } finally {
     db.release();
@@ -284,47 +267,38 @@ const getCoursesByState = async (state) => {
 };
 
 /* -------------------------
-   Join course
-   - New behavior: join by cursoId (schema doesn't include joinCode)
-   - Validates course exists and is 'Activo'
-   - Validates student not already enrolled
-   - Inserts into Curso_Student
-   Returns: { success: boolean, message, affectedRows }
+   Join Course
 --------------------------*/
 const joinCourse = async (studentUserId, cursoId) => {
   const db = await connection.getConnection();
   try {
     await db.beginTransaction();
 
-    // 1) course exists and is active
     const course = await getCourseById(cursoId);
-    if (!course) {
-      await db.rollback();
-      return { success: false, message: "Course not found" };
-    }
-    if (course.state !== "Activo") {
-      await db.rollback();
-      return { success: false, message: "Course is inactive" };
-    }
+    if (!course) return { success: false, message: "Course not found" };
+    if (course.state !== "Activo") return { success: false, message: "Course is inactive" };
 
-    // 2) not already enrolled
     const [exists] = await db.execute(
       `SELECT 1 FROM Curso_Student WHERE cursoId = ? AND studentUserId = ?`,
       [cursoId, studentUserId]
     );
+
     if (exists.length > 0) {
-      await db.rollback();
-      return { success: false, message: "Student already enrolled in this course" };
+      return { success: false, message: "Student already enrolled" };
     }
 
-    // 3) insert
     const [result] = await db.execute(
       `INSERT INTO Curso_Student (cursoId, studentUserId) VALUES (?, ?)`,
       [cursoId, studentUserId]
     );
 
     await db.commit();
-    return { success: true, message: "Student successfully joined the course", affectedRows: result.affectedRows };
+
+    return {
+      success: true,
+      message: "Student joined successfully",
+      affectedRows: result.affectedRows
+    };
   } catch (error) {
     await db.rollback();
     console.error("joinCourse error:", error);
@@ -335,15 +309,11 @@ const joinCourse = async (studentUserId, cursoId) => {
 };
 
 /* -------------------------
-   deleteStudentFromCourse (consolidated)
-   - Validates enrollment exists
-   - Deletes and returns affectedRows
-   Returns: { found: boolean, deleted: boolean, affectedRows }
+   Remove student from course
 --------------------------*/
 const deleteStudentFromCourse = async (studentUserId, cursoId) => {
   const db = await connection.getConnection();
   try {
-    // verify enrollment exists
     const [exists] = await db.execute(
       `SELECT 1 FROM Curso_Student WHERE studentUserId = ? AND cursoId = ?`,
       [studentUserId, cursoId]
@@ -358,18 +328,18 @@ const deleteStudentFromCourse = async (studentUserId, cursoId) => {
       [studentUserId, cursoId]
     );
 
-    return { found: true, deleted: result.affectedRows > 0, affectedRows: result.affectedRows };
-  } catch (error) {
-    console.error("deleteStudentFromCourse error:", error);
-    throw error;
+    return {
+      found: true,
+      deleted: result.affectedRows > 0,
+      affectedRows: result.affectedRows
+    };
   } finally {
     db.release();
   }
 };
 
 /* -------------------------
-   getCourseCategory & updateCourseCategory
-   - updateCourseCategory ensures course exists and returns boolean
+   Category helpers
 --------------------------*/
 const getCourseCategory = async (cursoId) => {
   const db = await connection.getConnection();
@@ -388,22 +358,55 @@ const updateCourseCategory = async (cursoId, newCategory) => {
   const db = await connection.getConnection();
   try {
     const course = await getCourseById(cursoId);
+
     if (!course) {
       return { found: false, updated: false, reason: "not_found" };
     }
+
     if (!newCategory || newCategory === course.category) {
-      return { found: true, updated: false, reason: "no_change", previous: course.category };
+      return {
+        found: true,
+        updated: false,
+        reason: "no_change",
+        previous: course.category
+      };
     }
+
     const [result] = await db.execute(
       `UPDATE Curso SET category = ? WHERE cursoId = ?`,
       [newCategory, cursoId]
     );
-    return { found: true, updated: result.affectedRows > 0, affectedRows: result.affectedRows };
+
+    return {
+      found: true,
+      updated: result.affectedRows > 0,
+      affectedRows: result.affectedRows
+    };
   } finally {
     db.release();
   }
 };
 
+/* -------------------------
+   Report: basic course info
+--------------------------*/
+const getCourseReportInfoDAO = async (courseId) => {
+  const db = await connection.getConnection();
+  try {
+    const [rows] = await db.execute(
+      `SELECT cursoId, name, category, startDate, endDate, instructorUserId
+       FROM Curso WHERE cursoId = ?`,
+      [courseId]
+    );
+    return rows[0] || null;
+  } finally {
+    db.release();
+  }
+};
+
+/* -------------------------
+   Exports
+--------------------------*/
 module.exports = {
   createCourse,
   getCourseById,
@@ -419,4 +422,5 @@ module.exports = {
   deleteStudentFromCourse,
   getCourseCategory,
   updateCourseCategory,
+  getCourseReportInfoDAO
 };

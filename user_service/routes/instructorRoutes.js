@@ -1,6 +1,6 @@
 const {Router} = require ('express');
 const router = Router();
-const {getInstructor} = require('../controllers/instructorController');
+const {getInstructor, fetchInstructor} = require('../controllers/instructorController');
 const uploadProfileImage = require("../middleware/uploadProfileImage");
 const { updateInstructorProfileController } = require("../controllers/profileController");
 
@@ -74,5 +74,28 @@ router.put('/:id', uploadProfileImage, updateInstructorProfileController);
  *       - application/json
  */
 router.put('/:id', updateInstructorProfileController);
+
+/**
+ * @swagger
+ * /instructors:
+ *   get:
+ *     summary: Obtiene la información de instructor 
+ *     tags: [Instructor]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Lista de estudiantes
+ *       400:
+ *         description: Parámetros faltantes
+ *       500:
+ *         description: Error del servidor
+ */
+router.get('/', fetchInstructor);
+
 
 module.exports = router;

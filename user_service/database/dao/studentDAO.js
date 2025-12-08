@@ -1,13 +1,19 @@
+// studentDAO.js
 const connection = require("../pool");
 
+/**
+ * Obtener estudiante por ID (userId = studentId)
+ */
 const getStudentById = async (studentId) => {
     const dbConnection = await connection.getConnection();
     try {
         const [rows] = await dbConnection.execute(
             `SELECT 
-                u.userName, 
-                u.paternalSurname, 
-                u.maternalSurname, 
+                u.userId,
+                u.userName,
+                u.paternalSurname,
+                u.maternalSurname,
+                u.email,
                 s.average,
                 l.levelName 
              FROM User u
@@ -19,9 +25,9 @@ const getStudentById = async (studentId) => {
             [studentId]
         );
 
-        return rows; // mantiene compatibilidad
+        return rows[0] || null;
     } catch (error) {
-        console.error("Error retrieving student data", error);
+        console.error("Error retrieving student:", error);
         throw error;
     } finally {
         dbConnection.release();
@@ -29,8 +35,7 @@ const getStudentById = async (studentId) => {
 };
 
 /**
- * Actualización parcial:
- * solo se actualizan los campos enviados.
+ * Actualización parcial del perfil del estudiante
  */
 const updateStudentProfile = async (studentId, fields) => {
     const dbConnection = await connection.getConnection();
@@ -39,7 +44,7 @@ const updateStudentProfile = async (studentId, fields) => {
         const updates = [];
         const values = [];
 
-        if (fields.levelId) {
+        if (fields.levelId !== undefined) {
             updates.push("levelId = ?");
             values.push(fields.levelId);
         }
@@ -58,20 +63,24 @@ const updateStudentProfile = async (studentId, fields) => {
         return result;
 
     } catch (error) {
-        console.error("Error updating student data", error);
+        console.error("Error updating student data:", error);
         throw error;
     } finally {
         dbConnection.release();
     }
 };
 
+/**
+ * Actualizar el promedio del estudiante
+ */
 const updateStudentAverage = async (studentId, average) => {
     const dbConnection = await connection.getConnection();
     try {
-        await dbConnection.execute(
+        const [result] = await dbConnection.execute(
             `UPDATE Student SET average = ? WHERE studentId = ?`,
             [average, studentId]
         );
+        return result;
     } catch (err) {
         console.error("Error updating student average:", err);
         throw err;
@@ -80,8 +89,36 @@ const updateStudentAverage = async (studentId, average) => {
     }
 };
 
-module.exports = { 
-    getStudentById, 
-    updateStudentProfile, 
-    updateStudentAverage 
+/**
+ * Datos para reportes (dev branch)
+ */
+const getStudentReportInfoDAO = async (studentId) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [rows] = await dbConnection.execute(
+            `SELECT 
+                u.userId,
+                CONCAT(u.userName, ' ', u.paternalSurname, ' ', u.maternalSurname) AS fullName,
+                u.email,
+                s.average
+            FROM User u
+            JOIN Student s ON u.userId = s.studentId
+            WHERE u.userId = ?`,
+            [studentId]
+        );
+
+        return rows[0] || null;
+    } catch (error) {
+        console.error("Error in getStudentReportInfoDAO:", error);
+        throw new Error("DATABASE_ERROR");
+    } finally {
+        dbConnection.release();
+    }
+};
+
+module.exports = {
+    getStudentById,
+    updateStudentProfile,
+    updateStudentAverage,
+    getStudentReportInfoDAO
 };

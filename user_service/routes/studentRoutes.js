@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const router = Router();
-const { getStudent, updateAverage} = require('../controllers/studentController');
+const { getStudent, updateAverage, getStudentReportInfoController} = require('../controllers/studentController');
 const { updateStudentProfileController } = require("../controllers/profileController");
 
 /**
@@ -107,4 +107,29 @@ router.put('/:id', updateStudentProfileController);
 
 router.put('/:studentId/average', updateAverage);
 
+/**
+ * @swagger
+ * /students/report-info/{studentId}:
+ *   get:
+ *     summary: Obtiene información detallada de un estudiante
+ *     description: Recupera la información de un estudiante incluyendo su nombre completo, correo y promedio, dado su ID.
+ *     tags: [Students]
+ *     parameters:
+ *       - in: path
+ *         name: studentId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del estudiante a consultar
+ *     responses:
+ *       200:
+ *         description: Información del estudiante obtenida correctamente
+ *       400:
+ *         description: Parámetro studentId no proporcionado o inválido
+ *       404:
+ *         description: Estudiante no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get("/report-info/:studentId", getStudentReportInfoController);
 module.exports = router;
