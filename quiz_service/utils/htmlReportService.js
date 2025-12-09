@@ -1,6 +1,5 @@
 const fs = require("fs");
 const path = require("path");
-
 const logoPath = path.join(__dirname, "templates/minao_logo.png");
 const base64Logo = fs.existsSync(logoPath) ? fs.readFileSync(logoPath).toString("base64") : "";
 
@@ -31,6 +30,7 @@ function ensureDataImagePrefix(base64) {
   return `data:image/png;base64,${base64}`;
 }
 
+// Formatea fecha a DD/MM/YYYY
 function formatDate(dateString) {
   if (!dateString) return "N/A";
   const date = new Date(dateString);
@@ -43,9 +43,46 @@ function formatDate(dateString) {
 }
 
 function generateStudentCourseHTML(data) {
-  const quizRowsHtml = generateQuizRows(data.course?.quizzes || []);
   const performanceChart = ensureDataImagePrefix(data.performanceChart);
   const correctIncorrectChart = ensureDataImagePrefix(data.correctIncorrectChart);
+
+  let quizSectionHtml = '';
+  if (data.hasQuizzes && (data.quizResults || []).length > 0) {
+    const quizRowsHtml = generateQuizRows(data.course?.quizzes || []);
+    quizSectionHtml = `
+      <div class="section">
+        <h2>Pruebas Realizadas</h2>
+        <table class="quiz-table">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Puntos obtenidos</th>
+              <th>Fecha</th>
+              <th>Intentos</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${quizRowsHtml}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <h2>Evolución del Desempeño</h2>
+        <p><strong>Correctas vs Incorrectas</strong></p>
+        <img class="chart" src="${correctIncorrectChart}" />
+        <p><strong>Desempeño en el tiempo</strong></p>
+        <img class="chart" src="${performanceChart}" />
+      </div>
+    `;
+  } else {
+    quizSectionHtml = `
+      <div class="section">
+        <h2>Pruebas Realizadas</h2>
+        <p>No hay cuestionarios registrados para este curso.</p>
+      </div>
+    `;
+  }
 
   return compileTemplate("studentCourseTemplate.html", {
     logoBase64: base64Logo ? `data:image/png;base64,${base64Logo}` : "",
@@ -57,9 +94,7 @@ function generateStudentCourseHTML(data) {
     courseStart: formatDate(data.course?.startDate) || "N/A",
     courseEnd: formatDate(data.course?.endDate) || "N/A",
     courseInstructor: data.course?.instructorName || "Desconocido",
-    quizRows: quizRowsHtml,
-    performanceChart,
-    correctIncorrectChart,
+    quizSection: quizSectionHtml, 
     year: new Date().getFullYear()
   });
 }
