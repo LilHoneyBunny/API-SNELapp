@@ -1,8 +1,8 @@
 const {Router} = require ('express');
 const router = Router();
-const {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
+const {createQuestionnaire, getQuizForUpdateController, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
     searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult,
-    listQuizResponses} = require('../controller/quizController');
+    listQuizResponses, getQuizForStudentController} = require('../controller/quizController');
 
 /**
  * @swagger
@@ -32,6 +32,32 @@ const {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire, getQuizzes
  *         description: Error del servidor
  */
 router.post('/createQuiz', createQuestionnaire);
+
+/**
+ * @swagger
+ * /quizzes/getQuizForUpdate/{quizId}:
+ *   get:
+ *     summary: Get full quiz info for update, including course, questions, options and correct answers
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the quiz to retrieve
+ *     responses:
+ *       200:
+ *         description: Quiz data retrieved successfully
+ *       404:
+ *         description: Quiz not found
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/getQuizForUpdate/:quizId", getQuizForUpdateController);
 
 /**
  * @swagger
@@ -333,5 +359,30 @@ router.get('/:quizId/responses', listQuizResponses);
  */
 router.get('/quizResult', viewQuizResult);
 
+/**
+ * @swagger
+ * /quizzes/studentQuiz/{quizId}:
+ *   get:
+ *     summary: Get quiz for student (without showing correct answers)
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the quiz to retrieve for student
+ *     responses:
+ *       200:
+ *         description: Quiz retrieved successfully
+ *       404:
+ *         description: Quiz not found
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/studentQuiz/:quizId", getQuizForStudentController);
 
 module.exports = router;
