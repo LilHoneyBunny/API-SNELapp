@@ -3,7 +3,7 @@ const HttpStatusCodes = require('../utils/enums');
 const jwt = require('jsonwebtoken');
 const { getStudentNames } = require("../service/userService");
 const {createQuiz, getQuizForUpdate, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, getQuizByDateCreation,
-    getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList} = require ("../database/dao/quizDAO");
+    getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList, getQuizForStudent} = require ("../database/dao/quizDAO");
 
 const createQuestionnaire = async (req, res) => {
     try {
@@ -374,6 +374,44 @@ const listQuizResponses = async (req, res) => {
     }
 };
 
+const getQuizForStudentController = async (req, res = response) => {
+    try {
+        const { quizId } = req.params;
+
+        if (!quizId) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                error: true,
+                statusCode: HttpStatusCodes.BAD_REQUEST,
+                details: "quizId is required in params."
+            });
+        }
+
+        const result = await getQuizForStudent(quizId);
+
+        if (!result) {
+            return res.status(HttpStatusCodes.NOT_FOUND).json({
+                error: true,
+                statusCode: HttpStatusCodes.NOT_FOUND,
+                details: "Quiz not found."
+            });
+        }
+
+        return res.status(HttpStatusCodes.OK).json({
+            success: true,
+            message: "Quiz retrieved successfully for student.",
+            result
+        });
+
+    } catch (error) {
+        console.error("Error fetching quiz for student:", error);
+
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: true,
+            statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+            details: "Error retrieving quiz. Try again later."
+        });
+    }
+};
 
 module.exports = {createQuestionnaire, getQuizForUpdateController, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
-    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult, listQuizResponses};
+    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult, listQuizResponses, getQuizForStudentController};
