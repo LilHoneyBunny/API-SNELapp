@@ -1,0 +1,123 @@
+components:
+  securitySchemes:
+      bearerAuth:
+        type: http
+        scheme: bearer
+        bearerFormat: JWT
+  schemas:
+    Quiz:
+      type: object
+      properties:
+        quizId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        creationDate:
+          type: string
+          format: date
+        numberQuestion:
+          type: integer
+        weighing:
+          type: number
+          format: float
+        cursoId:
+          type: integer
+        contentId:
+          type: integer
+      required:
+        - title
+        - cursoId
+        - contentId
+
+    QuizCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        numberQuestion:
+          type: integer
+        weighing:
+          type: number
+        cursoId:
+          type: integer
+        contentId:
+          type: integer
+      required:
+        - title
+        - cursoId
+        - contentId
+        - numberQuestion
+        - weighing
+
+    Report:
+      type: object
+      properties:
+        reportId:
+          type: integer
+        cursoId:
+          type: integer
+        studentUserId:
+          type: integer
+          nullable: true
+        type:
+          type: string
+          enum: [General, "Por estudiante"]
+        data:
+          type: object
+      required:
+        - cursoId
+        - type
+
+    ReportCreate:
+      type: object
+      properties:
+        cursoId:
+          type: integer
+        studentUserId:
+          type: integer
+          nullable: true
+        type:
+          type: string
+          enum: [General, "Por estudiante"]
+        data:
+          type: object
+      required:
+        - cursoId
+        - type
+        - data
+
+    Score:
+      type: object
+      properties:
+        scoreId:
+          type: integer
+        cursoId:
+          type: integer
+        studentUserId:
+          type: integer
+        score:
+          type: number
+      required:
+        - cursoId
+        - studentUserId
+        - score
+
+    ScoreCreate:
+      type: object
+      properties:
+        cursoId:
+          type: integer
+        studentUserId:
+          type: integer
+        score:
+          type: number
+      required:
+        - cursoId
+        - studentUserId
+        - score
+security:
+  - bearerAuth: []

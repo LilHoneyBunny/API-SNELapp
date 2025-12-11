@@ -1,0 +1,80 @@
+schemas:
+  NewCourse:
+    type: object
+    required: 
+      - name
+      - description
+      - category
+      - startDate
+      - endDate
+      - state
+      - instructorUserId
+    properties:
+      name:
+        type: string
+        description: Name of the course
+      description:
+        type: string
+        description: Description of the course
+      category:
+        type: string
+        description: Course category
+      startDate:
+        type: string
+        format: date
+        description: Course start date (YYYY-MM-DD)
+      endDate:
+        type: string
+        format: date
+        description: Course end date (YYYY-MM-DD)
+      state:
+        type: string
+        enum:
+          - Activo
+          - Inactivo
+        description: Course status (Active or Inactive)
+      instructorUserId:
+        type: integer
+        description: ID of the instructor responsible for the course
+  Content:
+    type: object
+    properties:
+    contentId:
+      type: integer
+    title:
+      type: string
+    type:
+      type: string
+    descripcion:
+      type: string
+    cursoId:
+      type: integer
+  NewContent:
+    type: object
+    required:
+      - title
+      - cursoId
+    properties:
+      title:
+        type: string
+        description: Título del contenido
+      type:
+        type: string
+        description: Tipo de contenido (video, pdf, quiz, etc.)
+      descripcion:
+        type: string
+        description: Descripción del contenido
+      cursoId:
+        type: integer
+        description: ID del curso al que pertenece
+  ContentFile:
+        type: object
+        properties:
+          fileId:
+            type: integer
+          filename:
+            type: string
+          fileType:
+            type: string
+          url:
+            type: string

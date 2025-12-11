@@ -1,0 +1,64 @@
+version: "3.9"
+
+services:
+  mysql_users:
+    image: mysql:8.0
+    container_name: mysql_users
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_USERS_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_USERS_DB}
+      MYSQL_USER: ${MYSQL_USERS_USER}
+      MYSQL_PASSWORD: ${MYSQL_USERS_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - users_data:/var/lib/mysql
+      - ./user_service/script/script.sql:/docker-entrypoint-initdb.d/script.sql
+
+  mysql_courses:
+    image: mysql:8.0
+    container_name: mysql_courses
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_COURSES_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_COURSES_DB}
+      MYSQL_USER: ${MYSQL_COURSES_USER}
+      MYSQL_PASSWORD: ${MYSQL_COURSES_PASSWORD}
+    ports:
+      - "3308:3306"
+    volumes:
+      - courses_data:/var/lib/mysql
+      - ./course_service/script/script.sql:/docker-entrypoint-initdb.d/script.sql
+  
+  mysql_quizzes:
+    image: mysql:8.0
+    container_name: mysql_quizzes
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_QUIZZES_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_QUIZZES_DB}
+      MYSQL_USER: ${MYSQL_QUIZZES_USER}
+      MYSQL_PASSWORD: ${MYSQL_QUIZZES_PASSWORD}
+    ports:
+      - "3309:3306"
+    volumes:
+      - quizzes_data:/var/lib/mysql
+      - ./quiz_service/script/script.sql:/docker-entrypoint-initdb.d/script.sql
+  
+  mysql_chat:
+    image: mysql:8.0
+    container_name: mysql_chat
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_CHAT_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_CHAT_DB}
+      MYSQL_USER: ${MYSQL_CHAT_USER}
+      MYSQL_PASSWORD: ${MYSQL_CHAT_PASSWORD}
+    ports:
+      - "3310:3306"
+    volumes:
+      - quizzes_data:/var/lib/mysql
+      - ./chat_service/script/script.sql:/docker-entrypoint-initdb.d/script.sql
+
+volumes:
+  users_data:
+  courses_data:
+  quizzes_data:
+  chat_data:
