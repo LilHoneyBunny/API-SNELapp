@@ -69,6 +69,27 @@ const findUserByEmail = async (email) => {
     }
 };
 
+const findUserByEmailJSON = async (email) => {
+    const query = 'SELECT * FROM User WHERE email = ?';
+    try {
+        const [rows] = await connection.execute(query, [email]);
+
+        if (rows.length === 0) return null;
+
+        const user = rows[0];
+
+        // Conversión de campos importantes si fuera necesario
+        user.isVerified = Boolean(user.isVerified);
+
+        return user; // Regresa todo el JSON del usuario
+    } catch (error) {
+        console.error("findUserByEmailJSON error:", error);
+        throw error;
+    }
+};
+
+
+
 const login = async (email, userPassword) => {
     const dbConnection = await connection.getConnection();
     const query = `
@@ -133,10 +154,6 @@ const updateUserVerification = (email) => {
     });
 };
 
-/**
- * Actualización parcial del perfil:
- * Solo se actualizan los campos enviados.
- */
 async function updateUserBasicProfile(
     userId,
     { userName, paternalSurname, maternalSurname, profileImageUrl }
@@ -147,10 +164,25 @@ async function updateUserBasicProfile(
         const fields = [];
         const values = [];
 
-        if (userName) { fields.push("userName = ?"); values.push(userName); }
-        if (paternalSurname) { fields.push("paternalSurname = ?"); values.push(paternalSurname); }
-        if (maternalSurname) { fields.push("maternalSurname = ?"); values.push(maternalSurname); }
-        if (profileImageUrl) { fields.push("profileImageUrl = ?"); values.push(profileImageUrl); }
+        if (userName !== undefined) {
+            fields.push("userName = ?");
+            values.push(userName);
+        }
+
+        if (paternalSurname !== undefined) {
+            fields.push("paternalSurname = ?");
+            values.push(paternalSurname);
+        }
+
+        if (maternalSurname !== undefined) {
+            fields.push("maternalSurname = ?");
+            values.push(maternalSurname);
+        }
+
+        if (profileImageUrl !== undefined) {
+            fields.push("profileImageUrl = ?");
+            values.push(profileImageUrl);
+        }
 
         if (fields.length === 0) return { affectedRows: 0 };
 
@@ -169,6 +201,7 @@ async function updateUserBasicProfile(
         db.release();
     }
 }
+
 
 const getStudentsByIds = async (studentIds) => {
     const dbConnection = await connection.getConnection();
@@ -201,5 +234,6 @@ module.exports = {
     findUser,
     updateUserVerification,
     getStudentsByIds,
-    updateUserBasicProfile
+    updateUserBasicProfile,
+    findUserByEmailJSON
 };
