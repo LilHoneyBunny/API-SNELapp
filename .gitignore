@@ -8,3 +8,5 @@ quiz_service/.env
 .DS_Store
 *.log
 .vscode/
+/course_service/node_modules/.bin
+/course_service/node_modules
