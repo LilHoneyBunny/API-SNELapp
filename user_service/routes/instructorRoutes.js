@@ -1,7 +1,6 @@
 const {Router} = require ('express');
 const router = Router();
 const {getInstructor, fetchInstructor} = require('../controllers/instructorController');
-//const uploadProfileImage = require("../middleware/uploadProfileImage");
 const { updateInstructorProfileController } = require("../controllers/profileController");
 
 

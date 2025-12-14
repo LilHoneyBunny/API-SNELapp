@@ -1,14 +1,4 @@
-// courseDAO.js
 const connection = require("../pool");
-
-/**
- * DAO — Curso
- * Compatible con la estructura SQL de minao_courses proporcionada por Lilly
- */
-
-/* -------------------------
-   Utilities
---------------------------*/
 const validStates = ["Activo", "Inactivo"];
 
 const parseIntSafe = (v) => {
@@ -16,9 +6,7 @@ const parseIntSafe = (v) => {
   return Number.isNaN(n) ? null : n;
 };
 
-/* -------------------------
-   Create Course
---------------------------*/
+
 const createCourse = async (course) => {
   const db = await connection.getConnection();
   try {
@@ -49,9 +37,7 @@ const createCourse = async (course) => {
   }
 };
 
-/* -------------------------
-   Get Course by Id
---------------------------*/
+
 const getCourseById = async (cursoId) => {
   const db = await connection.getConnection();
   try {
@@ -66,9 +52,7 @@ const getCourseById = async (cursoId) => {
   }
 };
 
-/* -------------------------
-   Get all courses by instructor
---------------------------*/
+
 const getAllCoursesByInstructor = async (instructorUserId) => {
   const db = await connection.getConnection();
   try {
@@ -82,9 +66,7 @@ const getAllCoursesByInstructor = async (instructorUserId) => {
     db.release();
   }
 };
-/* -------------------------
-   Get all courses available
---------------------------*/
+
 
 const getAllCourses = async () => {
     const dbConnection = await connection.getConnection();
@@ -112,9 +94,7 @@ const getAllCourses = async () => {
 
 
 
-/* -------------------------
-   Update course details
---------------------------*/
+
 const updateCourseDetails = async (cursoId, details) => {
   const db = await connection.getConnection();
   try {
@@ -170,9 +150,7 @@ const updateCourseDetails = async (cursoId, details) => {
   }
 };
 
-/* -------------------------
-   Update course state
---------------------------*/
+
 const updateCourseState = async (cursoId, newState) => {
   const db = await connection.getConnection();
   try {
@@ -204,9 +182,7 @@ const updateCourseState = async (cursoId, newState) => {
   }
 };
 
-/* -------------------------
-   Get courses by student
---------------------------*/
+
 const getCoursesByStudent = async (studentUserId) => {
   const db = await connection.getConnection();
   try {
@@ -223,9 +199,7 @@ const getCoursesByStudent = async (studentUserId) => {
   }
 };
 
-/* -------------------------
-   Filters
---------------------------*/
+
 const getCoursesByName = async (name) => {
   const db = await connection.getConnection();
   try {
@@ -295,9 +269,7 @@ const getCoursesByState = async (state) => {
   }
 };
 
-/* -------------------------
-   Join Course
---------------------------*/
+
 const joinCourse = async (studentUserId, cursoId) => {
   const db = await connection.getConnection();
   try {
@@ -337,9 +309,7 @@ const joinCourse = async (studentUserId, cursoId) => {
   }
 };
 
-/* -------------------------
-   Remove student from course
---------------------------*/
+
 const deleteStudentFromCourse = async (studentUserId, cursoId) => {
   const db = await connection.getConnection();
   try {
@@ -367,9 +337,7 @@ const deleteStudentFromCourse = async (studentUserId, cursoId) => {
   }
 };
 
-/* -------------------------
-   Category helpers
---------------------------*/
+
 const getCourseCategory = async (cursoId) => {
   const db = await connection.getConnection();
   try {
@@ -416,9 +384,7 @@ const updateCourseCategory = async (cursoId, newCategory) => {
   }
 };
 
-/* -------------------------
-   Report: basic course info
---------------------------*/
+
 const getCourseReportInfoDAO = async (courseId) => {
   const db = await connection.getConnection();
   try {
@@ -433,9 +399,7 @@ const getCourseReportInfoDAO = async (courseId) => {
   }
 };
 
-/* -------------------------
-   Exports
---------------------------*/
+
 module.exports = {
   createCourse,
   getCourseById,

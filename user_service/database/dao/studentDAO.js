@@ -1,9 +1,5 @@
-// studentDAO.js
 const connection = require("../pool");
 
-/**
- * Obtener estudiante por ID (userId = studentId)
- */
 const getStudentById = async (studentId) => {
     const dbConnection = await connection.getConnection();
     try {
@@ -34,9 +30,7 @@ const getStudentById = async (studentId) => {
     }
 };
 
-/**
- * Actualización parcial del perfil del estudiante
- */
+
 const updateStudentProfile = async (studentId, fields) => {
     const dbConnection = await connection.getConnection();
 
@@ -70,9 +64,7 @@ const updateStudentProfile = async (studentId, fields) => {
     }
 };
 
-/**
- * Actualizar el promedio del estudiante
- */
+
 const updateStudentAverage = async (studentId, average) => {
     const dbConnection = await connection.getConnection();
     try {
@@ -89,9 +81,7 @@ const updateStudentAverage = async (studentId, average) => {
     }
 };
 
-/**
- * Datos para reportes (dev branch)
- */
+
 const getStudentReportInfoDAO = async (studentId) => {
     const dbConnection = await connection.getConnection();
     try {

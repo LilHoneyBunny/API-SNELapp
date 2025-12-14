@@ -1,4 +1,3 @@
-// courseController.js
 const { request, response } = require("express");
 const axios = require("axios");
 const USERS_SERVICE_URL = process.env.USERS_SERVICE_URL;
@@ -24,9 +23,7 @@ const {
 
 const HttpStatusCodes = require("../utils/enums");
 
-/* -------------------------------------
-   Create course
---------------------------------------*/
+
 const createCurso = async (req, res = response) => {
   const { name, description, category, startDate, endDate, state, instructorUserId } = req.body;
 
@@ -63,9 +60,7 @@ const createCurso = async (req, res = response) => {
   }
 };
 
-/* -------------------------------------
-   Update course
---------------------------------------*/
+
 const updateCourse = async (req, res = response) => {
   const { cursoId, name, description, category, endDate } = req.body;
 
@@ -112,9 +107,7 @@ const updateCourse = async (req, res = response) => {
   }
 };
 
-/* -------------------------------------
-   Set Course State
---------------------------------------*/
+
 const setCourseState = async (req, res = response) => {
   const { cursoId, state } = req.body;
 
@@ -166,9 +159,7 @@ const setCourseState = async (req, res = response) => {
   }
 };
 
-/* -------------------------------------
-   Get Course by ID
---------------------------------------*/
+
 const getCourseDetailById = async (req, res = response) => {
   const { courseId } = req.params;
   const id = parseInt(courseId, 10);
@@ -224,9 +215,6 @@ const getAllCoursesController = async (req, res = response) => {
 };
 
 
-/* -------------------------------------
-   Get Courses by Instructor
---------------------------------------*/
 const getCoursesByInstructorJSON = async (req, res = response) => {
   const { instructorId } = req.params;
   const id = parseInt(instructorId, 10);
@@ -274,9 +262,7 @@ const getCoursesByInstructor = async (req, res = response) => {
     }
 };
 
-/* -------------------------------------
-   Join Course
---------------------------------------*/
+
 const joinCurso = async (req, res = response) => {
   const { studentUserId, cursoId } = req.body;
 
@@ -309,9 +295,7 @@ const joinCurso = async (req, res = response) => {
   }
 };
 
-/* -------------------------------------
-   Remove Student From Course
---------------------------------------*/
+
 const unenrollStudentFromCourse = async (req, res = response) => {
   const { courseId, studentId } = req.params;
 
@@ -348,11 +332,6 @@ const unenrollStudentFromCourse = async (req, res = response) => {
 };
 
 
-
-
-/* -------------------------------------
-   Queries
---------------------------------------*/
 const getCoursesByStudentController = async (req, res = response) => {
   const { studentId } = req.params;
 
@@ -368,10 +347,10 @@ const getCoursesByStudentController = async (req, res = response) => {
   try {
     const courses = await getCoursesByStudent(sId);
 
-    // Aquí aseguramos que la respuesta esté en el formato correcto
+
     return res.status(HttpStatusCodes.OK).json({
-      success: true,        // Aseguramos que incluimos "success" como indicador
-      data: courses         // Cambiamos "courses" a "data" para que coincida con lo que espera el frontend
+      success: true,        
+      data: courses         
     });
   } catch (error) {
     console.error("getCoursesByStudentController error:", error);
@@ -487,9 +466,7 @@ const getCoursesByStateController = async (req, res = response) => {
   }
 };
 
-/* -------------------------------------
-   Category Endpoints
---------------------------------------*/
+
 const getCategory = async (req, res) => {
   const { cursoId } = req.params;
   const id = parseInt(cursoId, 10);
@@ -558,9 +535,7 @@ const modifyCategory = async (req, res) => {
   }
 };
 
-/* -------------------------------------
-   Course Report (from dev branch)
---------------------------------------*/
+
 const getCourseReportInfo = async (req, res) => {
   const { courseId } = req.params;
 
@@ -604,9 +579,7 @@ const getCourseReportInfo = async (req, res) => {
   }
 };
 
-/* -------------------------------------
-   Deactivate course wrapper
---------------------------------------*/
+
 const deactivateCourse = async (req, res) => {
   req.body = req.body || {};
   req.body.cursoId = req.params.id || req.body.cursoId;
@@ -614,9 +587,7 @@ const deactivateCourse = async (req, res) => {
   return setCourseState(req, res);
 };
 
-/* -------------------------------------
-   Exports
---------------------------------------*/
+
 module.exports = {
   createCurso,
   updateCourse,

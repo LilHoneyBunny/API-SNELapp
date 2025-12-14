@@ -14,10 +14,10 @@ const {
     findUserByEmailJSON
 } = require("../database/dao/userDAO");
 
-// ✅ Necesario para actualización de perfil
+
 const { updateUserBasicProfile } = require("../database/dao/userDAO");
 
-/* ----------------------- REGISTER USER ----------------------- */
+
 
 const registerUser = async (req, res = response) => {
     const { userName, paternalSurname, maternalSurname, email, userPassword, userType } = req.body;
@@ -90,7 +90,7 @@ const registerUser = async (req, res = response) => {
     }
 };
 
-/* ----------------------- VALIDATORS ----------------------- */
+
 
 const validateName = /^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ ]{1,69}$/;
 
@@ -123,7 +123,7 @@ const validateLoginInput = (email, userPassword) => {
     return { valid: true };
 };
 
-/* ----------------------- LOGIN ----------------------- */
+
 
 const userLogin = async (req, res = response) => {
     const { email, userPassword } = req.body;
@@ -160,7 +160,7 @@ const userLogin = async (req, res = response) => {
     }
 };
 
-/* ----------------------- VERIFY USER ----------------------- */
+
 
 const verifyUser = async (req, res = response) => {
     const { email, verificationCode } = req.body;
@@ -194,7 +194,7 @@ const verifyUser = async (req, res = response) => {
 };
 
 
-/* ----------------------- GET STUDENTS ----------------------- */
+
 
 const fetchStudents = async (req, res) => {
     try {
@@ -210,7 +210,7 @@ const fetchStudents = async (req, res) => {
     }
 };
 
-/* ----------------------- GET USER BY EMAIL JSON ----------------------- */
+
 
 const findUserByEmailJSONController = async (req, res = response) => {
     const { email } = req.params;
@@ -237,7 +237,7 @@ const findUserByEmailJSONController = async (req, res = response) => {
     }
 };
 
-/* ----------------------- UPDATE BASIC PROFILE ----------------------- */
+
 
 const updateUserBasicProfileController = async (req, res) => {
     const { userId } = req.params;
@@ -277,7 +277,7 @@ const updateUserBasicProfileController = async (req, res) => {
 };
 
 
-/* ----------------------- EXPORTS ----------------------- */
+
 
 module.exports = { 
     registerUser, 

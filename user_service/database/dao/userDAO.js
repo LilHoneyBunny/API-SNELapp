@@ -78,10 +78,9 @@ const findUserByEmailJSON = async (email) => {
 
         const user = rows[0];
 
-        // Conversión de campos importantes si fuera necesario
         user.isVerified = Boolean(user.isVerified);
 
-        return user; // Regresa todo el JSON del usuario
+        return user; 
     } catch (error) {
         console.error("findUserByEmailJSON error:", error);
         throw error;

@@ -18,7 +18,7 @@ const client = new contentProto.ContentService(
   grpc.credentials.createInsecure()
 );
 
-// ------------------ UPLOAD FILE ------------------
+
 function uploadFile(contentId, filePath, fileType) {
   const call = client.UploadContentFile((err, response) => {
     if (err) console.error('Error uploading file:', err);
@@ -39,7 +39,7 @@ function uploadFile(contentId, filePath, fileType) {
   });
 }
 
-// ------------------ GET FILES ------------------
+
 function getFilesByContent(contentId) {
   client.GetFilesByContent({ contentId }, (err, response) => {
     if (err) console.error('Error fetching files:', err);
@@ -47,7 +47,7 @@ function getFilesByContent(contentId) {
   });
 }
 
-// ------------------ DELETE FILE ------------------
+
 function deleteFile(fileId) {
   client.DeleteFile({ fileId }, (err, response) => {
     if (err) console.error('Error deleting file:', err);
@@ -55,12 +55,12 @@ function deleteFile(fileId) {
   });
 }
 
-// EJEMPLO
-//const contentId = 1; 
-//const filePath = '/Users/miriam/Downloads/docEval 2.pdf';
-//const fileType = 'application/pdf';
 
-//uploadFile(contentId, filePath, fileType);
-//getFilesByContent(1)
 
- //deleteFile(3)
+
+
+
+
+
+
+ 

@@ -1,9 +1,5 @@
-// instructorDAO.js
 const connection = require("../pool");
 
-/**
- * Obtener instructor por ID (userId = instructorId)
- */
 const getInstructorById = async (instructorId) => {
     const dbConnection = await connection.getConnection();
     try {
@@ -34,9 +30,7 @@ const getInstructorById = async (instructorId) => {
     }
 };
 
-/**
- * Actualización parcial del instructor
- */
+
 const updateInstructorProfile = async (instructorId, fields) => {
     const dbConnection = await connection.getConnection();
     try {
@@ -72,9 +66,7 @@ const updateInstructorProfile = async (instructorId, fields) => {
     }
 };
 
-/**
- * Obtener múltiples instructores por IDs (para reportes)
- */
+
 const getInstructorId = async (instructorIds) => {
     const dbConnection = await connection.getConnection();
     try {

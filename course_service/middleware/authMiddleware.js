@@ -12,7 +12,6 @@ const verifyToken = (req, res, next) => {
         });
     }
 
-    // Formato esperado: "Bearer <token>"
     const parts = authHeader.split(' ');
     if (parts.length !== 2 || parts[0] !== 'Bearer') {
         return res.status(HttpStatusCodes.UNAUTHORIZED).json({
@@ -26,7 +25,7 @@ const verifyToken = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // decoded => { userId, email, role, iat, exp }
+        
         req.user = decoded;
         next();
     } catch (err) {
@@ -41,7 +40,7 @@ const verifyToken = (req, res, next) => {
 const requireRole = (roles = []) => {
     return (req, res, next) => {
         if (!req.user) {
-            // Por seguridad, por si se usa sin verifyToken antes
+            
             return res.status(401).json({
                 error: true,
                 statusCode: 401,

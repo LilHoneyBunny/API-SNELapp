@@ -25,8 +25,8 @@ const {
     } = require('../controller/courseController');
  
 
-    // Desactivado temporalmente para poder realizar las pruebas con postman más fluidamente
-//const { verifyToken, requireInstructor, requireStudent } = require('../middleware/authMiddleware');
+    
+
 
 /**
  * @swagger
