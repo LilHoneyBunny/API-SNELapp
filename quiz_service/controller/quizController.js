@@ -445,4 +445,5 @@ const getStudentsAttemptsController = async (req, res = response) => {
 
 
 module.exports = {createQuestionnaire, getQuizForUpdateController, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
-    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult, listQuizResponses, getQuizForStudentController, getStudentsAttemptsController };
+    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult, listQuizResponses, getQuizForStudentController, 
+    getStudentsAttemptsController };

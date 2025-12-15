@@ -10,6 +10,7 @@ const contentHandlers = {
     let fileType;
     let fileName;
 
+    
      call.on('data', async (chunk) => {
       try {
         if (!writeStream) {
@@ -32,10 +33,12 @@ const contentHandlers = {
       try {
         writeStream.end();
 
+        const originalName = fileName;
         const fileId = await addFileToContent({
           contentId,
           fileUrl: filePath,
-          fileType
+          fileType,
+          originalName
         });
 
         callback(null, { success: true, fileId, message: "File uploaded successfully" });
@@ -63,7 +66,7 @@ const contentHandlers = {
 
       callback(null, {
         success: true,
-        files: result.data.map(f => ({ fileId: f.fileId, url: f.fileUrl, fileType: f.fileType })),
+        files: result.data.map(f => ({ fileId: f.fileId, url: f.fileUrl, fileType: f.fileType})),
         message: "Files retrieved successfully"
       });
     } catch (error) {

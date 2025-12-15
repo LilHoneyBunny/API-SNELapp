@@ -2,12 +2,6 @@ const { Router } = require('express');
 const router = Router();
 
 const { registerUser, userLogin, verifyUser, fetchStudents, findUserByEmailJSONController, updateUserBasicProfileController } = require('../controllers/userController');
-const { verifyToken } = require('../middleware/authMiddleware');
-
-
-const { updateUserProfileController } = require("../controllers/profileController");
-
-
 
 /**
  * @swagger
@@ -118,7 +112,7 @@ router.post('/verify', verifyUser);
  *       500:
  *         description: Error del servidor
  */
-router.get('/', fetchStudents);
+router.get('/',  fetchStudents);
 
 
 /**
@@ -144,7 +138,7 @@ router.get('/', fetchStudents);
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/findUserByEmailJSON/:email', findUserByEmailJSONController);
+router.get('/findUserByEmailJSON/:email',  findUserByEmailJSONController);
 
 
 /**

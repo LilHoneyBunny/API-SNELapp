@@ -385,7 +385,34 @@ router.get('/quizResult', viewQuizResult);
  */
 router.get("/studentQuiz/:quizId", getQuizForStudentController);
 
-
+/**
+ * @swagger
+ * /quizzes/{quizId}/students/{studentUserId}/attempts:
+ *   get:
+ *     summary: Get attempts of a student for a specific quiz
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the quiz
+ *       - in: path
+ *         name: studentUserId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the student user
+ *     responses:
+ *       200:
+ *         description: Student attempts retrieved successfully
+ *       400:
+ *         description: quizId or studentUserId missing or invalid
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/:quizId/students/:studentUserId/attempts', getStudentsAttemptsController);
 
 
