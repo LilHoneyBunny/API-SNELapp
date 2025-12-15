@@ -360,5 +360,48 @@ const getQuizResult = async (quizId, studentUserId, attemptNumber) => {
     }
 };
 
+const getQuizForUpdate = async (quizId) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [quizRows] = await dbConnection.execute(
+            `SELECT quizId, title, description, creationDate, numberQuestion, weighing, status
+             FROM Quiz
+             WHERE quizId = ?`,
+            [quizId]
+        );
+
+        if (quizRows.length === 0) return null;
+        const quiz = quizRows[0];
+
+        const [questions] = await dbConnection.execute(
+            `SELECT questionId, questionText, points
+             FROM Question
+             WHERE quizId = ?`,
+            [quizId]
+        );
+
+        for (let q of questions) {
+            const [options] = await dbConnection.execute(
+                `SELECT optionId, optionText, isCorrect
+                 FROM OptionAnswer
+                 WHERE questionId = ?`,
+                [q.questionId]
+            );
+
+            q.options = options;
+        }
+
+        quiz.questions = questions;
+
+        return quiz;
+
+    } catch (error) {
+        console.error("Error fetching quiz for update:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
+
 module.exports = {createQuiz, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, 
-    getQuizByDateCreation, getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList };
+    getQuizByDateCreation, getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList, getQuizForUpdate };

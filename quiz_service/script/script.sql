@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS Quiz (
     quizId INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description VARCHAR(300),
-    creationDate DATE DEFAULT CURDATE(),
+    creationDate DATE DEFAULT (CURDATE()),
     numberQuestion INT,
     weighing DECIMAL(5,2),
     cursoId INT NOT NULL,

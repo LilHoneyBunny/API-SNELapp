@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS Curso (
     category VARCHAR(70),
     startDate DATE,
     endDate DATE,
+    joinCode VARCHAR(10),
     state ENUM('Activo','Inactivo') NOT NULL DEFAULT 'Activo',
     instructorUserId INT NOT NULL
 );

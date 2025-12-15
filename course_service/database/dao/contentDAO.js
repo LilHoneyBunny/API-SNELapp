@@ -44,7 +44,7 @@ const updateContentDetails = async (contentId, details) => {
 
         if (fields.length === 0) {
             throw new Error("No fields to update");
-        }
+        } 
 
         values.push(contentId); 
 

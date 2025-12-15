@@ -2,7 +2,7 @@ const {Router} = require ('express');
 const router = Router();
 const {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
     searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult,
-    listQuizResponses} = require('../controller/quizController');
+    listQuizResponses, getQuizForUpdateController} = require('../controller/quizController');
 
 /**
  * @swagger
@@ -337,6 +337,33 @@ router.get('/:quizId/responses', listQuizResponses);
  *         description: Error del servidor
  */
 router.get('/quizResult', viewQuizResult);
+
+/**
+ * @swagger
+ * /quizzes/getQuizForUpdate/{quizId}:
+ *   get:
+ *     summary: Get full quiz info for update, including course, questions, options and correct answers
+ *     tags:
+ *       - Quiz
+ *     parameters:
+ *       - in: path
+ *         name: quizId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the quiz to retrieve
+ *     responses:
+ *       200:
+ *         description: Quiz data retrieved successfully
+ *       404:
+ *         description: Quiz not found
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/getQuizForUpdate/:quizId", getQuizForUpdateController);
+
 
 
 module.exports = router;
