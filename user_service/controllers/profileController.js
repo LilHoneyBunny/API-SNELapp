@@ -3,14 +3,16 @@ const path = require("path");
 const fs = require("fs");
 const sharp = require("sharp");
 const HttpStatusCodes = require("../utils/enums");
-const { updateUserProfileBasic } = require("../database/dao/userDAO");
+
+// ✔ Importación CORRECTA según tu DAO
+const { updateUserBasicProfile } = require("../database/dao/userDAO");
 const { updateInstructorProfile } = require("../database/dao/instructorDAO");
 const { updateStudentProfile } = require("../database/dao/studentDAO");
 
 // misma regex que usas en userController
 const validateName = /^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ ]{1,69}$/;
 
-// Títulos mapeados a Title.titleId según tu inserción inicial
+// Títulos mapeados a Title.titleId
 const TITLE_MAP = {
     "Dr.": 1,
     "Mtro.": 2,
@@ -33,102 +35,62 @@ const processProfileImage = async (file) => {
     const outputFileName = `${fileNameWithoutExt}.jpg`;
     const outputPath = path.join(avatarsDir, outputFileName);
 
-    // "480p": usamos 854x480 (16:9) y recortamos
     await sharp(file.path)
         .resize({ width: 854, height: 480, fit: "cover" })
         .jpeg({ quality: 90 })
         .toFile(outputPath);
 
-    // eliminación del archivo temporal
     fs.unlink(file.path, () => {});
 
-    // ruta pública que verá el front
     return `/avatars/${outputFileName}`;
 };
 
 /**
  * PUT /users/:id
- * - Actualiza nombre, apellidos y foto de perfil (Instructor o Student)
+ * Actualiza nombre, apellidos y foto (Instructor o Student)
  */
-const updateUserProfileController = async (req, res = response) => {
-    const { id } = req.params;
-    const { userName, paternalSurname, maternalSurname } = req.body;
-
-    if (!userName || !validateName.test(userName)) {
-        return res.status(HttpStatusCodes.BAD_REQUEST).json({
-            error: true,
-            statusCode: HttpStatusCodes.BAD_REQUEST,
-            details: "Invalid name. Please provide a valid name (1-69 chars, Spanish alphabet and spaces)."
-        });
-    }
-
-    if (!paternalSurname || !validateName.test(paternalSurname)) {
-        return res.status(HttpStatusCodes.BAD_REQUEST).json({
-            error: true,
-            statusCode: HttpStatusCodes.BAD_REQUEST,
-            details: "Invalid paternal surname."
-        });
-    }
-
-    if (!maternalSurname || !validateName.test(maternalSurname)) {
-        return res.status(HttpStatusCodes.BAD_REQUEST).json({
-            error: true,
-            statusCode: HttpStatusCodes.BAD_REQUEST,
-            details: "Invalid maternal surname."
-        });
-    }
-
+const updateUserProfileController = async (req, res) => {
     try {
-        const profileImageUrl = await processProfileImage(req.file);
+        const { userID } = req.params;
 
-        await updateUserProfileBasic(id, {
+        // 🛡️ Protección absoluta
+        const {
             userName,
             paternalSurname,
-            maternalSurname,
-            profileImageUrl
-        });
+            maternalSurname
+        } = req.body || {};
 
-        return res.status(HttpStatusCodes.OK).json({
-            message: "User profile updated successfully",
-            profileImageUrl
-        });
-    } catch (error) {
-        console.error(error);
-        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-            error: true,
-            statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
-            details: "Error updating user profile"
-        });
-    }
-};
-
-const updateUserBasicProfile = async (userId, { userName, paternalSurname, maternalSurname, profileImageUrl }) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const [result] = await dbConnection.execute(
-            `UPDATE User 
-             SET userName = ?, paternalSurname = ?, maternalSurname = ?, profileImageUrl = ?
-             WHERE userId = ?`,
-            [userName, paternalSurname, maternalSurname, profileImageUrl, userId]
-        );
-
-        if (result.affectedRows === 0) {
-            throw new Error("No se pudo actualizar el perfil, asegúrate de que el usuario exista.");
+        if (!userName && !paternalSurname && !maternalSurname) {
+            return res.status(400).json({
+                success: false,
+                message: "No se enviaron datos para actualizar"
+            });
         }
 
-        return { success: true, message: "Perfil actualizado correctamente." };
+        // 👉 aquí tu lógica de BD
+        const updatedUser = await updateUserInDB(
+            userID,
+            userName,
+            paternalSurname,
+            maternalSurname
+        );
+
+        return res.json({
+            success: true,
+            user: updatedUser
+        });
+
     } catch (error) {
-        console.error("Error al actualizar el perfil del usuario:", error);
-        throw error;
-    } finally {
-        dbConnection.release();
+        console.error("❌ Error updateUserProfileController:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Error interno del servidor"
+        });
     }
 };
 
 /**
  * PUT /instructors/:id
- * - Actualiza título profesional y biografía (biografía solo instructores)
- * - La foto se edita por /users/:id, así no duplicamos campo
  */
 const updateInstructorProfileController = async (req, res = response) => {
     const { id } = req.params;
@@ -157,6 +119,7 @@ const updateInstructorProfileController = async (req, res = response) => {
         return res.status(HttpStatusCodes.OK).json({
             message: "Instructor profile updated successfully"
         });
+
     } catch (error) {
         console.error(error);
         return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -169,8 +132,6 @@ const updateInstructorProfileController = async (req, res = response) => {
 
 /**
  * PUT /students/:id
- * - Actualiza nivel educativo (Student.levelId)
- * - La foto de perfil se edita por /users/:id
  */
 const updateStudentProfileController = async (req, res = response) => {
     const { id } = req.params;
@@ -190,6 +151,7 @@ const updateStudentProfileController = async (req, res = response) => {
         return res.status(HttpStatusCodes.OK).json({
             message: "Student profile updated successfully"
         });
+
     } catch (error) {
         console.error(error);
         return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -203,6 +165,5 @@ const updateStudentProfileController = async (req, res = response) => {
 module.exports = {
     updateUserProfileController,
     updateInstructorProfileController,
-    updateStudentProfileController,
-    updateUserBasicProfile
+    updateStudentProfileController
 };

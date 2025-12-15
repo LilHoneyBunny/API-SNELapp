@@ -2,7 +2,7 @@ const {Router} = require ('express');
 const router = Router();
 const {createQuestionnaire, getQuizForUpdateController, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
     searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult,
-    listQuizResponses, getQuizForStudentController} = require('../controller/quizController');
+    listQuizResponses, getQuizForStudentController, getStudentsAttemptsController} = require('../controller/quizController');
 
 /**
  * @swagger
@@ -384,5 +384,9 @@ router.get('/quizResult', viewQuizResult);
  *         description: Internal server error
  */
 router.get("/studentQuiz/:quizId", getQuizForStudentController);
+
+
+router.get('/:quizId/students/:studentUserId/attempts', getStudentsAttemptsController);
+
 
 module.exports = router;

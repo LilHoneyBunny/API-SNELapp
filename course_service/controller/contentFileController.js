@@ -24,11 +24,20 @@ const uploadContentFile = async (req = request, res = response) => {
             fileType
         });
 
-        return res.status(HttpStatusCodes.CREATED).json({
+        callback(
+            null, 
+            {
+                success: true,                          
+                fileId: fileId,                                      
+                message: "Archivo subido y metadatos registrados."   
+            }
+        );
+
+        /*return res.status(HttpStatusCodes.CREATED).json({
             message: "File uploaded successfully",
             fileId,
             fileUrl
-        });
+        }); */
 
     } catch (error) {
         console.error("Upload error:", error);

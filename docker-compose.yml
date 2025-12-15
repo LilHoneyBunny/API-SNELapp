@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   mysql_users:
     image: mysql:8.0
@@ -54,7 +52,7 @@ services:
     ports:
       - "3310:3306"
     volumes:
-      - quizzes_data:/var/lib/mysql
+      - chat_data:/var/lib/mysql
       - ./chat_service/script/script.sql:/docker-entrypoint-initdb.d/script.sql
 
 volumes:

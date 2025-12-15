@@ -3,7 +3,7 @@ const HttpStatusCodes = require('../utils/enums');
 const jwt = require('jsonwebtoken');
 const { getStudentNames } = require("../service/userService");
 const {createQuiz, getQuizForUpdate, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, getQuizByDateCreation,
-    getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList, getQuizForStudent} = require ("../database/dao/quizDAO");
+    getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList, getQuizForStudent, getStudentsAttempts } = require ("../database/dao/quizDAO");
 
 const createQuestionnaire = async (req, res) => {
     try {
@@ -413,5 +413,36 @@ const getQuizForStudentController = async (req, res = response) => {
     }
 };
 
+const getStudentsAttemptsController = async (req, res = response) => {
+    try {
+        const { quizId, studentUserId } = req.params;
+
+        if (!quizId || !studentUserId) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                success: false,
+                message: "quizId and studentUserId are required"
+            });
+        }
+
+        const attempts = await getStudentsAttempts(quizId, studentUserId);
+
+        return res.status(HttpStatusCodes.OK).json({
+            success: true,
+            quizId,
+            studentUserId,
+            attempts
+        });
+
+    } catch (error) {
+        console.error("Error obtaining student attempts:", error);
+
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Error obtaining student attempts"
+        });
+    }
+};
+
+
 module.exports = {createQuestionnaire, getQuizForUpdateController, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
-    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult, listQuizResponses, getQuizForStudentController};
+    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult, listQuizResponses, getQuizForStudentController, getStudentsAttemptsController };

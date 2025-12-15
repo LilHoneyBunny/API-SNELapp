@@ -1,59 +1,86 @@
+// studentDAO.js
 const connection = require("../pool");
 
+/**
+ * Obtener estudiante por ID (userId = studentId)
+ */
 const getStudentById = async (studentId) => {
     const dbConnection = await connection.getConnection();
     try {
         const [rows] = await dbConnection.execute(
             `SELECT 
-                user.userName, 
-                user.paternalSurname, 
-                user.maternalSurname, 
-                student.average,
-                level.levelName 
-             FROM User user 
-             INNER JOIN Student student 
-                ON user.userId = student.studentId
-             INNER JOIN EducationLevel level 
-                ON student.levelId = level.levelId 
-             WHERE student.studentId = ?`,
+                u.userId,
+                u.userName,
+                u.paternalSurname,
+                u.maternalSurname,
+                u.email,
+                s.average,
+                l.levelName 
+             FROM User u
+             INNER JOIN Student s 
+                ON u.userId = s.studentId
+             INNER JOIN EducationLevel l 
+                ON s.levelId = l.levelId 
+             WHERE s.studentId = ?`,
             [studentId]
         );
 
-        return rows;
+        return rows[0] || null;
     } catch (error) {
-        console.error("Error retrieving student data", error);
-        throw error;
-    } finally {
-        dbConnection.release();   
-    }
-};
-
-const updateStudentProfile = async (studentId, { levelId }) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const [result] = await dbConnection.execute(
-            `UPDATE Student
-             SET levelId = ?
-             WHERE studentId = ?`,
-            [levelId, studentId]
-        );
-
-        return result;
-    } catch (error) {
-        console.error("Error updating student data", error);
+        console.error("Error retrieving student:", error);
         throw error;
     } finally {
         dbConnection.release();
     }
 };
 
+/**
+ * Actualización parcial del perfil del estudiante
+ */
+const updateStudentProfile = async (studentId, fields) => {
+    const dbConnection = await connection.getConnection();
+
+    try {
+        const updates = [];
+        const values = [];
+
+        if (fields.levelId !== undefined) {
+            updates.push("levelId = ?");
+            values.push(fields.levelId);
+        }
+
+        if (updates.length === 0) return { affectedRows: 0 };
+
+        const sql = `
+            UPDATE Student
+            SET ${updates.join(", ")}
+            WHERE studentId = ?
+        `;
+
+        values.push(studentId);
+
+        const [result] = await dbConnection.execute(sql, values);
+        return result;
+
+    } catch (error) {
+        console.error("Error updating student data:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+/**
+ * Actualizar el promedio del estudiante
+ */
 const updateStudentAverage = async (studentId, average) => {
     const dbConnection = await connection.getConnection();
     try {
-        await dbConnection.execute(
+        const [result] = await dbConnection.execute(
             `UPDATE Student SET average = ? WHERE studentId = ?`,
             [average, studentId]
         );
+        return result;
     } catch (err) {
         console.error("Error updating student average:", err);
         throw err;
@@ -62,7 +89,10 @@ const updateStudentAverage = async (studentId, average) => {
     }
 };
 
-async function getStudentReportInfoDAO(studentId) {
+/**
+ * Datos para reportes (dev branch)
+ */
+const getStudentReportInfoDAO = async (studentId) => {
     const dbConnection = await connection.getConnection();
     try {
         const [rows] = await dbConnection.execute(
@@ -81,9 +111,14 @@ async function getStudentReportInfoDAO(studentId) {
     } catch (error) {
         console.error("Error in getStudentReportInfoDAO:", error);
         throw new Error("DATABASE_ERROR");
-    }finally {
+    } finally {
         dbConnection.release();
     }
-}
+};
 
-module.exports = { getStudentById, updateStudentProfile, updateStudentAverage, getStudentReportInfoDAO };
+module.exports = {
+    getStudentById,
+    updateStudentProfile,
+    updateStudentAverage,
+    getStudentReportInfoDAO
+};

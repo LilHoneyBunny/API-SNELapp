@@ -447,5 +447,28 @@ const getQuizForStudent = async (quizId) => {
 };
 
 
+
+const getStudentsAttempts = async (quizId, studentUserId) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [rows] = await dbConnection.execute(
+            `SELECT *
+             FROM StudentResponse
+             WHERE quizId = ? AND studentUserId = ?
+             ORDER BY attemptNumber ASC, questionId ASC`,
+            [quizId, studentUserId]
+        );
+
+        return rows;
+
+    } catch (error) {
+        console.error("Error fetching student attempts:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+
 module.exports = {createQuiz, getQuizForUpdate, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, 
-    getQuizByDateCreation, getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList, getQuizForStudent };
+    getQuizByDateCreation, getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList, getQuizForStudent, getStudentsAttempts };
