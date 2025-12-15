@@ -81,7 +81,7 @@ const updateUserProfileController = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("❌ Error updateUserProfileController:", error);
+        console.error("Error updateUserProfileController:", error);
         return res.status(500).json({
             success: false,
             message: "Error interno del servidor"
