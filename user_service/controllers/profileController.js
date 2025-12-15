@@ -4,15 +4,15 @@ const fs = require("fs");
 const sharp = require("sharp");
 const HttpStatusCodes = require("../utils/enums");
 
-// ✔ Importación CORRECTA según tu DAO
+
 const { updateUserBasicProfile } = require("../database/dao/userDAO");
 const { updateInstructorProfile } = require("../database/dao/instructorDAO");
 const { updateStudentProfile } = require("../database/dao/studentDAO");
 
-// misma regex que usas en userController
+
 const validateName = /^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ ]{1,69}$/;
 
-// Títulos mapeados a Title.titleId
+
 const TITLE_MAP = {
     "Dr.": 1,
     "Mtro.": 2,
@@ -53,7 +53,7 @@ const updateUserProfileController = async (req, res) => {
     try {
         const { userID } = req.params;
 
-        // 🛡️ Protección absoluta
+        
         const {
             userName,
             paternalSurname,
@@ -67,7 +67,7 @@ const updateUserProfileController = async (req, res) => {
             });
         }
 
-        // 👉 aquí tu lógica de BD
+        
         const updatedUser = await updateUserInDB(
             userID,
             userName,
@@ -81,7 +81,7 @@ const updateUserProfileController = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("❌ Error updateUserProfileController:", error);
+        console.error("Error updateUserProfileController:", error);
         return res.status(500).json({
             success: false,
             message: "Error interno del servidor"

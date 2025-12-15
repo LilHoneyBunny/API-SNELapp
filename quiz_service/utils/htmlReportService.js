@@ -30,7 +30,6 @@ function ensureDataImagePrefix(base64) {
   return `data:image/png;base64,${base64}`;
 }
 
-// Formatea fecha a DD/MM/YYYY
 function formatDate(dateString) {
   if (!dateString) return "N/A";
   const date = new Date(dateString);

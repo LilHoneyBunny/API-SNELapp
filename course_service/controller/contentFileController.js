@@ -33,11 +33,6 @@ const uploadContentFile = async (req = request, res = response) => {
             }
         );
 
-        /*return res.status(HttpStatusCodes.CREATED).json({
-            message: "File uploaded successfully",
-            fileId,
-            fileUrl
-        }); */
 
     } catch (error) {
         console.error("Upload error:", error);
