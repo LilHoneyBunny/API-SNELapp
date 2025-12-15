@@ -1,21 +1,28 @@
 /** @type {import('jest').Config} */
 module.exports = {
-  displayName: "backend",
-  testEnvironment: "node",
-  roots: ["<rootDir>/tests"],
-  testMatch: ["<rootDir>/tests/**/*.test.js"],
-  setupFilesAfterEnv: ["<rootDir>/tests/setup/backend.setup.js"],
+  // Opcional pero recomendado
   clearMocks: true,
-  restoreMocks: true,
-  resetMocks: true,
-  testPathIgnorePatterns: ["/node_modules/", "/dist/", "/build/"],
-  collectCoverageFrom: [
-    "**/*.js",
-    "!**/node_modules/**",
-    "!**/tests/**",
-    "!**/dist/**",
-    "!**/build/**"
+  testEnvironment: "node",
+
+  // Si tienes algún setup global compartido, déjalo aquí.
+  // En tu repo existe tests/setup/backend.setup.js
+  setupFilesAfterEnv: ["<rootDir>/tests/setup/backend.setup.js"],
+
+  // Ignorar node_modules siempre
+  testPathIgnorePatterns: ["/node_modules/"],
+
+  projects: [
+    {
+      displayName: "course_service",
+      testMatch: ["<rootDir>/course_service/tests/**/*.test.js"],
+    },
+    {
+      displayName: "quiz_service",
+      testMatch: ["<rootDir>/quiz_service/tests/**/*.test.js"],
+    },
+    {
+      displayName: "user_service",
+      testMatch: ["<rootDir>/user_service/tests/**/*.test.js"],
+    },
   ],
-  coverageDirectory: "<rootDir>/coverage",
-  coverageReporters: ["text", "lcov"]
 };
