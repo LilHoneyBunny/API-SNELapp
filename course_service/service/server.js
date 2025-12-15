@@ -36,6 +36,7 @@ class Server {
         this.app.use("/minao_systems/courses", require('../routes/courseRoutes'));
         this.app.use("/minao_systems/content", require('../routes/contentRoutes'));
         this.app.use("/minao_systems/student", require('../routes/courseStudentRoutes'));
+        this.app.use("/minao_systems/instructor", require('../routes/courseInstructorRoutes'));
         this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
     }
 

@@ -113,6 +113,49 @@ const updateQuiz = async (quizId, details) => {
     }
 };
 
+const getQuizForUpdate = async (quizId) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [quizRows] = await dbConnection.execute(
+            `SELECT quizId, title, description, creationDate, numberQuestion, weighing, status
+             FROM Quiz
+             WHERE quizId = ?`,
+            [quizId]
+        );
+
+        if (quizRows.length === 0) return null;
+        const quiz = quizRows[0];
+
+        const [questions] = await dbConnection.execute(
+            `SELECT questionId, questionText, points
+             FROM Question
+             WHERE quizId = ?`,
+            [quizId]
+        );
+
+        for (let q of questions) {
+            const [options] = await dbConnection.execute(
+                `SELECT optionId, optionText, isCorrect
+                 FROM OptionAnswer
+                 WHERE questionId = ?`,
+                [q.questionId]
+            );
+
+            q.options = options;
+        }
+
+        quiz.questions = questions;
+
+        return quiz;
+
+    } catch (error) {
+        console.error("Error fetching quiz for update:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
+
 const deleteQuiz = async (quizId) => {
     const dbConnection = await connection.getConnection();
     try {
@@ -360,7 +403,8 @@ const getQuizResult = async (quizId, studentUserId, attemptNumber) => {
     }
 };
 
-const getQuizForUpdate = async (quizId) => {
+
+const getQuizForStudent = async (quizId) => {
     const dbConnection = await connection.getConnection();
     try {
         const [quizRows] = await dbConnection.execute(
@@ -382,7 +426,7 @@ const getQuizForUpdate = async (quizId) => {
 
         for (let q of questions) {
             const [options] = await dbConnection.execute(
-                `SELECT optionId, optionText, isCorrect
+                `SELECT optionId, optionText
                  FROM OptionAnswer
                  WHERE questionId = ?`,
                 [q.questionId]
@@ -396,12 +440,35 @@ const getQuizForUpdate = async (quizId) => {
         return quiz;
 
     } catch (error) {
-        console.error("Error fetching quiz for update:", error);
+        console.error("Error fetching quiz for student:", error);
         throw error;
     } finally {
         dbConnection.release();
     }
 };
 
-module.exports = {createQuiz, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, 
-    getQuizByDateCreation, getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList, getQuizForUpdate };
+
+const getStudentsAttempts = async (quizId, studentUserId) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const [rows] = await dbConnection.execute(
+            `SELECT *
+             FROM StudentResponse
+             WHERE quizId = ? AND studentUserId = ?
+             ORDER BY attemptNumber ASC, questionId ASC`,
+            [quizId, studentUserId]
+        );
+
+        return rows;
+
+    } catch (error) {
+        console.error("Error fetching student attempts:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+
+module.exports = {createQuiz, getQuizForUpdate, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, 
+    getQuizByDateCreation, getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList, getQuizForStudent, getStudentsAttempts };

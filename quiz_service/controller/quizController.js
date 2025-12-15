@@ -2,8 +2,13 @@ const { request, response } = require("express");
 const HttpStatusCodes = require('../utils/enums');
 const jwt = require('jsonwebtoken');
 const { getStudentNames } = require("../service/userService");
+<<<<<<< HEAD
 const {createQuiz, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, getQuizByDateCreation,
     getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList, getQuizForUpdate} = require ("../database/dao/quizDAO");
+=======
+const {createQuiz, getQuizForUpdate, updateQuiz, deleteQuiz, getAllQuiz, getQuizByTitle, getQuizByDateCreation,
+    getQuizById, submitQuizAnswers, getQuizResult, getQuizResponsesList, getQuizForStudent, getStudentsAttempts } = require ("../database/dao/quizDAO");
+>>>>>>> origin/miriam
 
 const createQuestionnaire = async (req, res) => {
     try {
@@ -40,6 +45,46 @@ const createQuestionnaire = async (req, res) => {
         });
     }
 };
+
+const getQuizForUpdateController = async (req, res = response) => {
+    try {
+        const { quizId } = req.params;
+
+        if (!quizId) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                error: true,
+                statusCode: HttpStatusCodes.BAD_REQUEST,
+                details: "quizId is required in params."
+            });
+        }
+
+        const result = await getQuizForUpdate(quizId);
+
+        if (!result) {
+            return res.status(HttpStatusCodes.NOT_FOUND).json({
+                error: true,
+                statusCode: HttpStatusCodes.NOT_FOUND,
+                details: "Quiz not found."
+            });
+        }
+
+        return res.status(HttpStatusCodes.OK).json({
+            success: true,
+            message: "Quiz retrieved successfully.",
+            result
+        });
+
+    } catch (error) {
+        console.error("Error fetching quiz for update:", error);
+
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: true,
+            statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+            details: "Error fetching quiz information. Try again later."
+        });
+    }
+};
+
 
 const updateQuestionnaire = async (req, res = response) => {
     try {
@@ -334,6 +379,7 @@ const listQuizResponses = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 const getQuizForUpdateController = async (req, res = response) => {
     try {
         const { quizId } = req.params;
@@ -376,3 +422,77 @@ const getQuizForUpdateController = async (req, res = response) => {
 
 module.exports = {createQuestionnaire, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
     searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult, listQuizResponses, getQuizForUpdateController};
+=======
+const getQuizForStudentController = async (req, res = response) => {
+    try {
+        const { quizId } = req.params;
+
+        if (!quizId) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                error: true,
+                statusCode: HttpStatusCodes.BAD_REQUEST,
+                details: "quizId is required in params."
+            });
+        }
+
+        const result = await getQuizForStudent(quizId);
+
+        if (!result) {
+            return res.status(HttpStatusCodes.NOT_FOUND).json({
+                error: true,
+                statusCode: HttpStatusCodes.NOT_FOUND,
+                details: "Quiz not found."
+            });
+        }
+
+        return res.status(HttpStatusCodes.OK).json({
+            success: true,
+            message: "Quiz retrieved successfully for student.",
+            result
+        });
+
+    } catch (error) {
+        console.error("Error fetching quiz for student:", error);
+
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: true,
+            statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+            details: "Error retrieving quiz. Try again later."
+        });
+    }
+};
+
+const getStudentsAttemptsController = async (req, res = response) => {
+    try {
+        const { quizId, studentUserId } = req.params;
+
+        if (!quizId || !studentUserId) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                success: false,
+                message: "quizId and studentUserId are required"
+            });
+        }
+
+        const attempts = await getStudentsAttempts(quizId, studentUserId);
+
+        return res.status(HttpStatusCodes.OK).json({
+            success: true,
+            quizId,
+            studentUserId,
+            attempts
+        });
+
+    } catch (error) {
+        console.error("Error obtaining student attempts:", error);
+
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Error obtaining student attempts"
+        });
+    }
+};
+
+
+module.exports = {createQuestionnaire, getQuizForUpdateController, updateQuestionnaire, deleteQuestionnaire, getQuizzesByCourse, 
+    searchQuizByTitle, searchQuizByDate, getQuizDetailForUser, answerQuiz, viewQuizResult, listQuizResponses, getQuizForStudentController, getStudentsAttemptsController };
+>>>>>>> origin/miriam

@@ -1,13 +1,32 @@
 const { Router } = require('express');
 const router = Router();
+const { getAllCourses } = require('../database/dao/courseDAO');
 
-const {createCurso, setCourseState, updateCourse, getCourseDetailById, getCoursesByInstructor, joinCurso,
-    getCoursesByStudentController, getCoursesByNameController, getCoursesByCategoryController, getCoursesByMonthController,
-    getCoursesByStateController, deactivateCourse, unenrollStudentFromCourse, deleteStudentFromCourse, getCategory,
-    modifyCategory} = require('../controller/courseController');
+const {
+        createCurso,
+        setCourseState, 
+        updateCourse, 
+        getCourseDetailById,
+        getAllCoursesController, 
+        getCoursesByInstructor,
+        getCoursesByInstructorJSON,
+        joinCurso,
+        getCoursesByStudentController, 
+        getCoursesByNameController, 
+        getCoursesByCategoryController, 
+        getCoursesByMonthController,
+        getCoursesByStateController, 
+        deactivateCourse, 
+        unenrollStudentFromCourse, 
+        deleteStudentFromCourse, 
+        getCategory,
+        modifyCategory, 
+        getCourseReportInfo
+    } = require('../controller/courseController');
+ 
 
-const { verifyToken, requireInstructor, requireStudent } = require('../middleware/authMiddleware');
-
+    // Desactivado temporalmente para poder realizar las pruebas con postman más fluidamente
+//const { verifyToken, requireInstructor, requireStudent } = require('../middleware/authMiddleware');
 
 /**
  * @swagger
@@ -115,6 +134,9 @@ router.patch('/updateCourse', updateCourse);
  */
 router.patch('/setCourseState', setCourseState);
 
+
+
+router.get('/all', getAllCoursesController);
 /**
  * @swagger
  * /courses/{courseId}:
@@ -160,6 +182,29 @@ router.get('/:courseId', getCourseDetailById);
  *         description: Server error
  */
 router.get('/instructor/:instructorId', getCoursesByInstructor);
+
+/**
+ * @swagger
+ * /courses/instructor/{instructorId}:
+ *   get:
+ *     summary: Get all courses created by an instructor
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: instructorId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the instructor whose courses will be fetched
+ *     responses:
+ *       200:
+ *         description: Courses fetched successfully
+ *       404:
+ *         description: No courses found for this instructor
+ *       500:
+ *         description: Server error
+ */
+router.get('/instructor/:instructorId', getCoursesByInstructorJSON);
 
 /**
  * @swagger
@@ -379,8 +424,6 @@ router.get('/search/by-category', getCoursesByCategoryController);
  */
 router.get('/search/by-month', getCoursesByMonthController);
 
-
-
 /**
  * @swagger
  * /courses/search/by-state:
@@ -561,5 +604,37 @@ router.get("/:cursoId/category", getCategory);
  *         description: Course not found
  */
 router.put("/:cursoId/category", modifyCategory);
+
+/**
+ * @swagger
+ * /courses/{courseId}/report-info:
+ *   get:
+ *     summary: Obtiene información detallada del curso para generar reportes
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del curso
+ *     responses:
+ *       200:
+ *         description: Información del curso obtenida correctamente
+ *       404:
+ *         description: Curso no encontrado
+ *       500:
+ *         description: Error del servidor
+ */
+router.get("/:courseId/report-info", getCourseReportInfo);
+
+
+
+
+
+
+
+
+
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const {Router} = require ('express');
 const router = Router();
-const {getInstructor} = require('../controllers/instructorController');
-const uploadProfileImage = require("../middleware/uploadProfileImage");
+const {getInstructor, fetchInstructor} = require('../controllers/instructorController');
+//const uploadProfileImage = require("../middleware/uploadProfileImage");
 const { updateInstructorProfileController } = require("../controllers/profileController");
 
 
@@ -35,7 +35,7 @@ const { updateInstructorProfileController } = require("../controllers/profileCon
  */
 router.get('/:instructorId', getInstructor);
 
-/**
+/*
  * @swagger
  * /instructors/{id}:
  *   put:
@@ -62,7 +62,8 @@ router.get('/:instructorId', getInstructor);
  *       200:
  *         description: Perfil de instructor actualizado correctamente
  */
-router.put('/:id', uploadProfileImage, updateInstructorProfileController);
+
+//router.put('/:id', uploadProfileImage, updateInstructorProfileController);
 
 /**
  * @swagger
@@ -74,5 +75,28 @@ router.put('/:id', uploadProfileImage, updateInstructorProfileController);
  *       - application/json
  */
 router.put('/:id', updateInstructorProfileController);
+
+/**
+ * @swagger
+ * /instructors:
+ *   get:
+ *     summary: Obtiene la información de instructor 
+ *     tags: [Instructor]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Lista de estudiantes
+ *       400:
+ *         description: Parámetros faltantes
+ *       500:
+ *         description: Error del servidor
+ */
+router.get('/', fetchInstructor);
+
 
 module.exports = router;

@@ -1,281 +1,456 @@
+// courseDAO.js
 const connection = require("../pool");
 
+/**
+ * DAO — Curso
+ * Compatible con la estructura SQL de minao_courses proporcionada por Lilly
+ */
+
+/* -------------------------
+   Utilities
+--------------------------*/
+const validStates = ["Activo", "Inactivo"];
+
+const parseIntSafe = (v) => {
+  const n = parseInt(v, 10);
+  return Number.isNaN(n) ? null : n;
+};
+
+/* -------------------------
+   Create Course
+--------------------------*/
 const createCourse = async (course) => {
-    const dbConnection = await connection.getConnection();
-    const joinCode = generateJoinCode();
-    try {
-        await dbConnection.beginTransaction();
-        const [courseResult] = await dbConnection.execute(
-            `INSERT INTO Curso (name, description, category, startDate, endDate, state, instructorUserId, joinCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [course.name, course.description, course.category, course.startDate, course.endDate, course.state, course.instructorUserId, joinCode]
-        );
+  const db = await connection.getConnection();
+  try {
+    await db.beginTransaction();
 
-        const cursoId = courseResult.insertId;
-        await dbConnection.commit();
+    const [result] = await db.execute(
+      `INSERT INTO Curso (name, description, category, startDate, endDate, state, instructorUserId)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        course.name,
+        course.description || null,
+        course.category || null,
+        course.startDate || null,
+        course.endDate || null,
+        validStates.includes(course.state) ? course.state : "Activo",
+        course.instructorUserId
+      ]
+    );
 
-        return { success: true, cursoId, joinCode };
-
-    } catch (error) {
-        await dbConnection.rollback();
-        console.error("Course creating error:", error);
-        throw error;
-    } finally {
-        dbConnection.release();
-    }
+    await db.commit();
+    return { success: true, cursoId: result.insertId };
+  } catch (error) {
+    await db.rollback();
+    console.error("createCourse error:", error);
+    throw error;
+  } finally {
+    db.release();
+  }
 };
 
-const generateJoinCode = (length = 7) => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < length; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
-};
-
-const getCourseCategory = async (courseId) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const [rows] = await dbConnection.execute(
-            `SELECT category FROM Curso WHERE cursoId = ?`,
-            [courseId]
-        );
-        return rows[0] || null;
-    } finally {
-        dbConnection.release();
-    }
-};
-
-const updateCourseDetails = async (cursoId, details) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const { name, description, category, endDate } = details;
-        const fields = [];
-        const values = [];
-
-        if (name) {
-            fields.push("name = ?");
-            values.push(name);
-        }
-        if (description) {
-            fields.push("description = ?");
-            values.push(description);
-        }
-        if (category) {
-            fields.push("category = ?");
-            values.push(category);
-        }
-        if (endDate) {
-            fields.push("endDate = ?");
-            values.push(endDate);
-        }
-
-        if (fields.length === 0) {
-            throw new Error("No fields to update");
-        }
-
-        values.push(cursoId);
-
-        const query = `UPDATE Curso SET ${fields.join(", ")} WHERE cursoId = ?`;
-        const [result] = await dbConnection.execute(query, values);
-
-        return result;
-    } catch (error) {
-        console.error("Error updating course details:", error);
-        throw error;
-    } finally {
-        dbConnection.release();
-    }
-};
-
-const updateCourseState = async (cursoId, newState) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        await dbConnection.beginTransaction();
-
-        const validStates = ["Activo", "Inactivo"];
-        const state = validStates.includes(newState) ? newState : "Activo";
-
-        const [result] = await dbConnection.execute(
-            `UPDATE Curso SET state = ? WHERE cursoId = ?`,
-            [state, cursoId]
-        );
-
-        await dbConnection.commit();
-        return result;
-    } catch (error) {
-        await dbConnection.rollback();
-        console.error("Error updating course state:", error);
-        throw error;
-    } finally {
-        dbConnection.release();
-    }
-};
-
+/* -------------------------
+   Get Course by Id
+--------------------------*/
 const getCourseById = async (cursoId) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const [rows] = await dbConnection.execute(
-            `SELECT name, description, category, startDate, endDate, state FROM Curso WHERE cursoId = ?`,
-            [cursoId]
-        );
-
-        return rows;
-    } catch (error) {
-        console.error("Error fetching course by ID:", error);
-        throw error;
-    } finally {
-        dbConnection.release();
-    }
+  const db = await connection.getConnection();
+  try {
+    const [rows] = await db.execute(
+      `SELECT cursoId, name, description, category, startDate, endDate, state, instructorUserId
+       FROM Curso WHERE cursoId = ?`,
+      [cursoId]
+    );
+    return rows[0] || null;
+  } finally {
+    db.release();
+  }
 };
 
+/* -------------------------
+   Get all courses by instructor
+--------------------------*/
 const getAllCoursesByInstructor = async (instructorUserId) => {
+  const db = await connection.getConnection();
+  try {
+    const [rows] = await db.execute(
+      `SELECT cursoId, name, description, category, startDate, endDate, state
+       FROM Curso WHERE instructorUserId = ?`,
+      [instructorUserId]
+    );
+    return rows;
+  } finally {
+    db.release();
+  }
+};
+/* -------------------------
+   Get all courses available
+--------------------------*/
+
+const getAllCourses = async () => {
     const dbConnection = await connection.getConnection();
     try {
         const [rows] = await dbConnection.execute(
-            `SELECT cursoId, name, description, category, startDate, endDate, state FROM Curso WHERE instructorUserId = ? AND state = 'Activo' `,
-            [instructorUserId]
+            `SELECT 
+                cursoId,
+                name,
+                description,
+                category,
+                startDate,
+                endDate,
+                state
+             FROM Curso
+             WHERE state = 'Activo'`
         );
 
         return rows;
-    } catch (error) {
-        console.error("Error fetching instructor courses:", error);
-        throw error;
+
     } finally {
         dbConnection.release();
     }
 };
 
-const joinCourse = async (studentUserId, joinCode) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        await dbConnection.beginTransaction();
 
-        const [result] = await dbConnection.execute(
-            `INSERT INTO Curso_Student (cursoId, studentUserId)
-             SELECT cursoId, ? FROM Curso WHERE joinCode = ? AND state = 'Activo'
-               AND cursoId NOT IN (
-                   SELECT cursoId FROM Curso_Student WHERE studentUserId = ?
-               )`,
-            [studentUserId, joinCode, studentUserId]
-        );
 
-        await dbConnection.commit();
 
-        if (result.affectedRows === 0) {
-            return { success: false, message: "Invalid code, inactive course, or student already joined" };
-        }
+/* -------------------------
+   Update course details
+--------------------------*/
+const updateCourseDetails = async (cursoId, details) => {
+  const db = await connection.getConnection();
+  try {
+    const course = await getCourseById(cursoId);
+    if (!course) return { found: false };
 
-        return { success: true, message: "Student successfully joined the course" };
+    const { name, description, category, endDate } = details;
 
-    } catch (error) {
-        await dbConnection.rollback();
-        console.error("Error joining course:", error);
-        throw error;
-    } finally {
-        dbConnection.release();
+    const fields = [];
+    const values = [];
+
+    if (name && name !== course.name) {
+      fields.push("name = ?");
+      values.push(name);
     }
+    if (description && description !== course.description) {
+      fields.push("description = ?");
+      values.push(description);
+    }
+    if (category && category !== course.category) {
+      fields.push("category = ?");
+      values.push(category);
+    }
+    if (endDate && endDate !== course.endDate) {
+      fields.push("endDate = ?");
+      values.push(endDate);
+    }
+
+    if (fields.length === 0) {
+      return { found: true, updated: false, reason: "no_changes", previous: course };
+    }
+
+    values.push(cursoId);
+    const query = `UPDATE Curso SET ${fields.join(", ")} WHERE cursoId = ?`;
+
+    const [result] = await db.execute(query, values);
+
+    const updated = await getCourseById(cursoId);
+
+    return {
+      found: true,
+      updated: result.affectedRows > 0,
+      affectedRows: result.affectedRows,
+      previous: course,
+      current: updated,
+      updatedFields: fields.map((f) => f.split(" = ")[0])
+    };
+  } catch (error) {
+    console.error("updateCourseDetails error:", error);
+    throw error;
+  } finally {
+    db.release();
+  }
 };
 
-const getCoursesByStudent = async (studentId) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const [rows] = await dbConnection.execute(
-            `SELECT curso.name, curso.description, curso.category, curso.startDate, curso.endDate, curso.state FROM Curso curso 
-            INNER JOIN Curso_Student student_course ON curso.cursoId = student_course.cursoId WHERE student_course.studentUserId = ? AND state = 'Activo' `,
-            [studentId]
-        );
-        return rows;
-    } finally {
-        dbConnection.release();
+/* -------------------------
+   Update course state
+--------------------------*/
+const updateCourseState = async (cursoId, newState) => {
+  const db = await connection.getConnection();
+  try {
+    const course = await getCourseById(cursoId);
+    if (!course) return { found: false };
+
+    if (!validStates.includes(newState)) {
+      return { found: true, updated: false, reason: "invalid_state", previousState: course.state };
     }
+
+    if (course.state === newState) {
+      return { found: true, updated: false, reason: "same_state", previousState: course.state };
+    }
+
+    const [result] = await db.execute(
+      `UPDATE Curso SET state = ? WHERE cursoId = ?`,
+      [newState, cursoId]
+    );
+
+    return {
+      found: true,
+      updated: result.affectedRows > 0,
+      previousState: course.state,
+      newState,
+      affectedRows: result.affectedRows
+    };
+  } finally {
+    db.release();
+  }
 };
 
+/* -------------------------
+   Get courses by student
+--------------------------*/
+const getCoursesByStudent = async (studentUserId) => {
+  const db = await connection.getConnection();
+  try {
+    const [rows] = await db.execute(
+      `SELECT c.cursoId, c.name, c.description, c.category, c.startDate, c.endDate, c.state
+       FROM Curso c
+       INNER JOIN Curso_Student cs ON c.cursoId = cs.cursoId
+       WHERE cs.studentUserId = ?`,
+      [studentUserId]
+    );
+    return rows;
+  } finally {
+    db.release();
+  }
+};
+
+/* -------------------------
+   Filters
+--------------------------*/
 const getCoursesByName = async (name) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const [rows] = await dbConnection.execute(
-            `SELECT * FROM Curso WHERE name LIKE ?`,
-            [`%${name}%`]
-        );
-        return rows;
-    } finally {
-        dbConnection.release();
-    }
+  const db = await connection.getConnection();
+  try {
+    const [rows] = await db.execute(
+      `SELECT cursoId, name, description, category, startDate, endDate, state 
+       FROM Curso WHERE name LIKE ?`,
+      [`%${name}%`]
+    );
+    return rows;
+  } finally {
+    db.release();
+  }
 };
 
 const getCoursesByCategory = async (category) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const [rows] = await dbConnection.execute(
-            `SELECT * FROM Curso WHERE category = ?`,
-            [category]
-        );
-        return rows;
-    } finally {
-        dbConnection.release();
-    }
+  const db = await connection.getConnection();
+  try {
+    const [rows] = await db.execute(
+      `SELECT cursoId, name, description, category, startDate, endDate, state 
+       FROM Curso WHERE category = ?`,
+      [category]
+    );
+    return rows;
+  } finally {
+    db.release();
+  }
 };
 
 const getCoursesByMonth = async (year, month) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const [rows] = await dbConnection.execute(
-            `SELECT * FROM Curso WHERE YEAR(startDate) = ? AND MONTH(startDate) = ?`,
-            [year, month]
-        );
-        return rows;
-    } finally {
-        dbConnection.release();
+  const db = await connection.getConnection();
+  try {
+    const y = parseIntSafe(year);
+    const m = parseIntSafe(month);
+
+    if (!y || !m || m < 1 || m > 12) {
+      return { error: "invalid_year_or_month", rows: [] };
     }
+
+    const [rows] = await db.execute(
+      `SELECT cursoId, name, description, category, startDate, endDate, state
+       FROM Curso WHERE YEAR(startDate) = ? AND MONTH(startDate) = ?`,
+      [y, m]
+    );
+
+    return { rows };
+  } finally {
+    db.release();
+  }
 };
 
 const getCoursesByState = async (state) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const [rows] = await dbConnection.execute(
-            `SELECT * FROM Curso WHERE state = ?`,
-            [state]
-        );
-        return rows;
-    } finally {
-        dbConnection.release();
+  const db = await connection.getConnection();
+  try {
+    if (!validStates.includes(state)) {
+      return { error: "invalid_state", rows: [] };
     }
+
+    const [rows] = await db.execute(
+      `SELECT cursoId, name, description, category, startDate, endDate, state
+       FROM Curso WHERE state = ?`,
+      [state]
+    );
+
+    return { rows };
+  } finally {
+    db.release();
+  }
 };
 
-const removeStudentFromCourse = async (cursoId, studentUserId) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const [courses] = await dbConnection.execute(
-            `SELECT curso.cursoId, curso.name, curso.description, curso.category, curso.startDate, curso.endDate, curso.state, curso.instructorUserId
-             FROM Curso curso INNER JOIN Curso_Student curso_student ON curso.cursoId = curso_student.cursoId
-             WHERE curso_student.studentUserId = ? AND state = 'Activo'`,
-            [studentUserId]
-        );
+/* -------------------------
+   Join Course
+--------------------------*/
+const joinCourse = async (studentUserId, cursoId) => {
+  const db = await connection.getConnection();
+  try {
+    await db.beginTransaction();
 
-        return result;
-    } catch (error) {
-        console.error("Error removing student from course:", error);
-        throw error;
-    } finally {
-        dbConnection.release();
+    const course = await getCourseById(cursoId);
+    if (!course) return { success: false, message: "Course not found" };
+    if (course.state !== "Activo") return { success: false, message: "Course is inactive" };
+
+    const [exists] = await db.execute(
+      `SELECT 1 FROM Curso_Student WHERE cursoId = ? AND studentUserId = ?`,
+      [cursoId, studentUserId]
+    );
+
+    if (exists.length > 0) {
+      return { success: false, message: "Student already enrolled" };
     }
+
+    const [result] = await db.execute(
+      `INSERT INTO Curso_Student (cursoId, studentUserId) VALUES (?, ?)`,
+      [cursoId, studentUserId]
+    );
+
+    await db.commit();
+
+    return {
+      success: true,
+      message: "Student joined successfully",
+      affectedRows: result.affectedRows
+    };
+  } catch (error) {
+    await db.rollback();
+    console.error("joinCourse error:", error);
+    throw error;
+  } finally {
+    db.release();
+  }
 };
 
-const updateCourseCategory = async (courseId, newCategory) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const [result] = await dbConnection.execute(
-            `UPDATE Curso SET category = ? WHERE cursoId = ?`,
-            [newCategory, courseId]
-        );
-        return result.affectedRows > 0; // true si se actualizó, false si no
-    } finally {
-        dbConnection.release();
+/* -------------------------
+   Remove student from course
+--------------------------*/
+const deleteStudentFromCourse = async (studentUserId, cursoId) => {
+  const db = await connection.getConnection();
+  try {
+    const [exists] = await db.execute(
+      `SELECT 1 FROM Curso_Student WHERE studentUserId = ? AND cursoId = ?`,
+      [studentUserId, cursoId]
+    );
+
+    if (exists.length === 0) {
+      return { found: false, deleted: false, affectedRows: 0 };
     }
+
+    const [result] = await db.execute(
+      `DELETE FROM Curso_Student WHERE studentUserId = ? AND cursoId = ?`,
+      [studentUserId, cursoId]
+    );
+
+    return {
+      found: true,
+      deleted: result.affectedRows > 0,
+      affectedRows: result.affectedRows
+    };
+  } finally {
+    db.release();
+  }
 };
 
-module.exports = {createCourse, updateCourseDetails, updateCourseState, getCourseById, getAllCoursesByInstructor, joinCourse,
-    getCoursesByStudent, getCoursesByName, getCoursesByCategory, getCoursesByMonth, getCoursesByState, removeStudentFromCourse,
-    getCourseCategory, updateCourseCategory
+/* -------------------------
+   Category helpers
+--------------------------*/
+const getCourseCategory = async (cursoId) => {
+  const db = await connection.getConnection();
+  try {
+    const [rows] = await db.execute(
+      `SELECT category FROM Curso WHERE cursoId = ?`,
+      [cursoId]
+    );
+    return rows[0] || null;
+  } finally {
+    db.release();
+  }
+};
+
+const updateCourseCategory = async (cursoId, newCategory) => {
+  const db = await connection.getConnection();
+  try {
+    const course = await getCourseById(cursoId);
+
+    if (!course) {
+      return { found: false, updated: false, reason: "not_found" };
+    }
+
+    if (!newCategory || newCategory === course.category) {
+      return {
+        found: true,
+        updated: false,
+        reason: "no_change",
+        previous: course.category
+      };
+    }
+
+    const [result] = await db.execute(
+      `UPDATE Curso SET category = ? WHERE cursoId = ?`,
+      [newCategory, cursoId]
+    );
+
+    return {
+      found: true,
+      updated: result.affectedRows > 0,
+      affectedRows: result.affectedRows
+    };
+  } finally {
+    db.release();
+  }
+};
+
+/* -------------------------
+   Report: basic course info
+--------------------------*/
+const getCourseReportInfoDAO = async (courseId) => {
+  const db = await connection.getConnection();
+  try {
+    const [rows] = await db.execute(
+      `SELECT cursoId, name, category, startDate, endDate, instructorUserId
+       FROM Curso WHERE cursoId = ?`,
+      [courseId]
+    );
+    return rows[0] || null;
+  } finally {
+    db.release();
+  }
+};
+
+/* -------------------------
+   Exports
+--------------------------*/
+module.exports = {
+  createCourse,
+  getCourseById,
+  getAllCoursesByInstructor,
+  getAllCourses,
+  updateCourseDetails,
+  updateCourseState,
+  getCoursesByStudent,
+  getCoursesByName,
+  getCoursesByCategory,
+  getCoursesByMonth,
+  getCoursesByState,
+  joinCourse,
+  deleteStudentFromCourse,
+  getCourseCategory,
+  updateCourseCategory,
+  getCourseReportInfoDAO
 };

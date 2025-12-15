@@ -49,4 +49,5 @@ const getStudentIdsInCourse = async (courseId) => {
         dbConnection.release();
     }
 };
+
 module.exports = { removeStudentFromCourse, getStudentCountInCourse, getStudentIdsInCourse};

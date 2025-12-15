@@ -34,4 +34,52 @@ const updateStudentAverageInUserService = async (studentId, average) => {
     }
 };
 
-module.exports = { getStudentNames, updateStudentAverageInUserService };
+const getStudentInfo = async (studentId) => {
+    try {
+        const res = await fetch(`http://localhost:3000/minao_systems/students/${studentId}`);
+        if (!res.ok) throw new Error(`Error fetching student: ${res.statusText}`);
+        const data = await res.json();
+        return data.result[0]; 
+    } catch (err) {
+        console.error(err);
+        return { studentId, userName: "Desconocido", paternalSurname: "", maternalSurname: "", average: 0 };
+    }
+};
+
+const getInstructorInfo = async (instructorId) => {
+    try {
+        const res = await fetch(`http://localhost:3000/minao_systems/instructors/${instructorId}`);
+        if (!res.ok) throw new Error(`Error fetching instructor: ${res.statusText}`);
+        const data = await res.json();
+        return data.result[0]; 
+    } catch (err) {
+        console.error(err);
+        return { instructorId, userName: "Desconocido" };
+    }
+};
+
+const getCourseInfo = async (courseId) => {
+    try {
+        const res = await fetch(`http://localhost:8000/minao_systems/courses/${courseId}`);
+        if (!res.ok) throw new Error(`Error fetching course: ${res.statusText}`);
+        const data = await res.json();
+        return data.result[0]; 
+    } catch (err) {
+        console.error(err);
+        return { courseId, name: "Desconocido" };
+    }
+};
+
+const getStudentsInCourse = async (courseId) => {
+    try {
+        const res = await fetch(`http://localhost:3000/minao_systems/students/${courseId}/students/average`);
+        if (!res.ok) throw new Error(`Error fetching students in course: ${res.statusText}`);
+        const data = await res.json();
+        return data.students; 
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+};
+module.exports = { getStudentNames, updateStudentAverageInUserService, getStudentInfo, getInstructorInfo, 
+    getCourseInfo, getStudentsInCourse};

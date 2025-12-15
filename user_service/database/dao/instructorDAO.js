@@ -1,41 +1,109 @@
-const connection = require ("../pool");
+// instructorDAO.js
+const connection = require("../pool");
 
+/**
+ * Obtener instructor por ID (userId = instructorId)
+ */
 const getInstructorById = async (instructorId) => {
     const dbConnection = await connection.getConnection();
     try {
         const [rows] = await dbConnection.execute(
-            `SELECT user.userName, user.paternalSurname, user.maternalSurname, instructor.biography, 
-            title.titleName FROM User user INNER JOIN Instructor instructor ON user.userId = instructor.instructorId
-            INNER JOIN Title title ON instructor.titleId = title.titleId WHERE instructor.instructorId = ?`,
+            `SELECT 
+                u.userId,
+                u.userName, 
+                u.paternalSurname, 
+                u.maternalSurname, 
+                u.email,
+                i.biography, 
+                t.titleName 
+             FROM User u 
+             INNER JOIN Instructor i 
+                ON u.userId = i.instructorId
+             LEFT JOIN Title t 
+                ON i.titleId = t.titleId 
+             WHERE i.instructorId = ?`,
             [instructorId]
         );
 
-        return rows;
+        return rows[0] || null;
     } catch (error) {
-        console.error("Error retrieving instructor data", error);
-        throw error;
-    }finally{
-        dbConnection.release();
-    }
-};
-
-const updateInstructorProfile = async (instructorId, { titleId, biography }) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const [result] = await dbConnection.execute(
-            `UPDATE Instructor
-             SET titleId = ?, biography = ?
-             WHERE instructorId = ?`,
-            [titleId, biography, instructorId]
-        );
-
-        return result;
-    } catch (error) {
-        console.error("Error updating instructor data", error);
+        console.error("Error retrieving instructor data:", error);
         throw error;
     } finally {
         dbConnection.release();
     }
 };
 
-module.exports = { getInstructorById, updateInstructorProfile };
+/**
+ * Actualización parcial del instructor
+ */
+const updateInstructorProfile = async (instructorId, fields) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const updates = [];
+        const values = [];
+
+        if (fields.titleId !== undefined) {
+            updates.push("titleId = ?");
+            values.push(fields.titleId);
+        }
+        if (fields.biography !== undefined) {
+            updates.push("biography = ?");
+            values.push(fields.biography);
+        }
+
+        if (updates.length === 0) return { affectedRows: 0 };
+
+        const sql = `
+            UPDATE Instructor
+            SET ${updates.join(", ")}
+            WHERE instructorId = ?
+        `;
+
+        values.push(instructorId);
+
+        const [result] = await dbConnection.execute(sql, values);
+        return result;
+    } catch (error) {
+        console.error("Error updating instructor:", error);
+        throw error;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+/**
+ * Obtener múltiples instructores por IDs (para reportes)
+ */
+const getInstructorId = async (instructorIds) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        if (!Array.isArray(instructorIds) || instructorIds.length === 0) return [];
+
+        const placeholders = instructorIds.map(() => "?").join(",");
+        const [rows] = await dbConnection.execute(
+            `SELECT 
+                i.instructorId,
+                CONCAT(u.userName, ' ', u.paternalSurname, ' ', u.maternalSurname) AS name, 
+                u.email, 
+                u.userType
+             FROM Instructor i
+             JOIN User u ON i.instructorId = u.userId
+             WHERE i.instructorId IN (${placeholders})`,
+            instructorIds
+        );
+
+        return rows;
+    } catch (err) {
+        console.error("Error in getInstructorId:", err);
+        return instructorIds.map(id => ({ instructorId: id, name: "Desconocido" }));
+    } finally {
+        dbConnection.release();
+    }
+};
+
+module.exports = {
+    getInstructorById,
+    updateInstructorProfile,
+    getInstructorId
+};

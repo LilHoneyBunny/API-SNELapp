@@ -1,6 +1,7 @@
 const { request, response } = require("express");
 const HttpStatusCodes = require('../utils/enums');
-const {getStudentById, updateStudentAverage, getStudentsWithAverageInCourse} = require("../database/dao/studentDAO");
+const {getStudentById, updateStudentAverage} = require("../database/dao/studentDAO");
+const { getStudentReportInfo } = require("../utils/studentService");
 
 const getStudent = async (req, res = response) => {
     const { studentId } = req.params;
@@ -41,4 +42,39 @@ const updateAverage = async (req, res) => {
     }
 };
 
-module.exports = {getStudent, updateAverage};
+async function getStudentReportInfoController(req, res) {
+    try {
+        const { studentId } = req.params;
+
+        if (!studentId) {
+            return res.status(HttpStatusCodes.BAD_REQUEST).json({
+                error: "El parámetro studentId es obligatorio"
+            });
+        }
+
+        const student = await getStudentReportInfo(studentId);
+
+        if (!student) {
+            return res.status(HttpStatusCodes.NOT_FOUND).json({
+                error: "Estudiante no encontrado"
+            });
+        }
+
+        return res.status(HttpStatusCodes.OK).json(student);
+
+    } catch (error) {
+
+        console.error("Error in getStudentReportInfoController:", error);
+
+        if (error.message === "DATABASE_ERROR") {
+            return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+                error: "Error al consultar la base de datos"
+            });
+        }
+
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            error: "Error inesperado al obtener información del estudiante"
+        });
+    }
+}
+module.exports = {getStudent, updateAverage, getStudentReportInfoController};

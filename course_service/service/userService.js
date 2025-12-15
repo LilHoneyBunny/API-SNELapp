@@ -16,4 +16,19 @@ const getStudentsInfoFromUserService = async (studentIds) => {
     }
 };
 
-module.exports = { getStudentsInfoFromUserService};
+const getInstructorInfoFromUserService = async (instructorId) => {
+    if (!instructorId || instructorId.length === 0) return [];
+
+    const url = `http://localhost:3000/minao_systems/instructors?ids=${instructorId.join(',')}`;
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`Error fetching users: ${res.statusText}`);
+        const data = await res.json();
+        return data.instructor;
+    } catch (err) {
+        console.error("Error getting students info from user service:", err);
+        return instructorId.map(id => ({ instructorId: id, name: "Desconocido", email: " " }));
+    }
+};
+
+module.exports = { getStudentsInfoFromUserService, getInstructorInfoFromUserService};
