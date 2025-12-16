@@ -87,16 +87,15 @@ const viewReportStudent = async (req, res) => {
       .send(html);
       
   } catch (error) {
-    console.error("viewStudentCourseReport error:", err.message);
+    console.error("viewStudentCourseReport error:", error.message);
     return res
       .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
       .json({
         error: "Error visualizing student report",
-        detail: err.message
+        detail: error.message
       });
 
   }
 
 };
 module.exports = {getStudentCourseReport, getStudentQuizResults, viewReportStudent};
-

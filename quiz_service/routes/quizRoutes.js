@@ -361,15 +361,9 @@ router.get('/quizResult', viewQuizResult);
 
 /**
  * @swagger
-<<<<<<< HEAD
- * /quizzes/getQuizForUpdate/{quizId}:
- *   get:
- *     summary: Get full quiz info for update, including course, questions, options and correct answers
-=======
  * /quizzes/studentQuiz/{quizId}:
  *   get:
  *     summary: Get quiz for student (without showing correct answers)
->>>>>>> origin/miriam
  *     tags:
  *       - Quiz
  *     parameters:
