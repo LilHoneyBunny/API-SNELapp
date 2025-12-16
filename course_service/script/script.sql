@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS ContentFile (
     contentId INT NOT NULL,
     fileUrl VARCHAR(500) NOT NULL,
     fileType VARCHAR(50),
+    originalName VARCHAR(255) NOT NULL,
     FOREIGN KEY (contentId) REFERENCES Content(contentId) ON DELETE CASCADE
 );
 

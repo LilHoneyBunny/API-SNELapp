@@ -25,9 +25,6 @@ const {
     } = require('../controller/courseController');
  
 
-    
-
-
 /**
  * @swagger
  * tags:
@@ -627,14 +624,6 @@ router.put("/:cursoId/category", modifyCategory);
  *         description: Error del servidor
  */
 router.get("/:courseId/report-info", getCourseReportInfo);
-
-
-
-
-
-
-
-
 
 
 module.exports = router;

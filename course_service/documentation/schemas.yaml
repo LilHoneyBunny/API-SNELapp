@@ -78,3 +78,5 @@ schemas:
             type: string
           url:
             type: string
+          originalName:
+            type: string

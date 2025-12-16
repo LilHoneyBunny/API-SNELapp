@@ -4,11 +4,11 @@ const HttpStatusCodes = require("../../utils/enums");
 const addFileToContent = async (fileData) => {
     const dbConnection = await connection.getConnection();
     try {
-        const { contentId, fileUrl, fileType } = fileData;
+        const { contentId, fileUrl, fileType, originalName } = fileData;
 
         const [result] = await dbConnection.execute(
-            `INSERT INTO ContentFile (contentId, fileUrl, fileType) VALUES (?, ?, ?)`,
-            [contentId, fileUrl, fileType]
+            `INSERT INTO ContentFile (contentId, fileUrl, fileType, originalName) VALUES (?, ?, ?, ?)`,
+            [contentId, fileUrl, fileType, originalName]
         );
 
         return result.insertId;

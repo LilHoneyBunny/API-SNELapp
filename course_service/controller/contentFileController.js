@@ -80,4 +80,10 @@ const deleteFileController = async (req, res) => {
     }
 };
 
-module.exports = {uploadContentFile, getFilesByContentController, deleteFileController};
+const downloadFile = (req, res) => {
+  const { filename } = req.params;
+  const filePath = path.join(__dirname, "../uploads", filename);
+  res.download(filePath);
+};
+
+module.exports = {uploadContentFile, getFilesByContentController, deleteFileController, downloadFile};
