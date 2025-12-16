@@ -383,6 +383,7 @@ router.get('/quizResult', viewQuizResult);
  *       500:
  *         description: Internal server error
  */
+
 router.get("/studentQuiz/:quizId", getQuizForStudentController);
 
 /**

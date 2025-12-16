@@ -403,6 +403,7 @@ const getQuizResult = async (quizId, studentUserId, attemptNumber) => {
     }
 };
 
+
 const getQuizForStudent = async (quizId) => {
     const dbConnection = await connection.getConnection();
     try {
@@ -445,7 +446,6 @@ const getQuizForStudent = async (quizId) => {
         dbConnection.release();
     }
 };
-
 
 
 const getStudentsAttempts = async (quizId, studentUserId) => {
