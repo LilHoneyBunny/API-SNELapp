@@ -56,6 +56,23 @@ function deleteFile(fileId) {
 }
 
 
+uploadFile(
+  1,                             // contentId que exista
+  '/Users/miriam/Downloads/02-Protocolo http.pdf',    // ruta real del archivo
+  'application/pdf'
+);
+
+setTimeout(() => {
+  getFilesByContent(1);
+}, 2000);
+
+// 3️⃣ (OPCIONAL) ELIMINAR
+/*
+setTimeout(() => {
+  deleteFile(1); // fileId real
+}, 4000);
+*/
+
 
 
 
