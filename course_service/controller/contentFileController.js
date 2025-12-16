@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+const mime = require("mime-types");
 const { request, response } = require("express");
 const { addFileToContent, getFilesByContent, deleteFile } = require("../database/dao/contentFileDAO");
 const HttpStatusCodes = require('../utils/enums');
@@ -126,7 +127,8 @@ const viewContentFileController = async (req, res) => {
             });
         }
 
-        res.setHeader("Content-Type", "application/pdf");
+        const contentType = mime.lookup(filePath) || "application/octet-stream";
+        res.setHeader("Content-Type", contentType);
         res.setHeader(
             "Content-Disposition",
             `inline; filename="${filename}"`
