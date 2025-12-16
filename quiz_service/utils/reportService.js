@@ -18,23 +18,15 @@ function formatDate(dateString) {
 async function buildStudentCourseReportData(studentId, courseId) {
   try {
     const studentInfoRaw = await fetchStudentInfo(studentId);
+    console.log("studentInfoRaw:", studentInfoRaw);
     const studentObj = Array.isArray(studentInfoRaw) ? studentInfoRaw[0] : (studentInfoRaw || {});
     const student = {
       fullName: studentObj?.name || studentObj?.fullName || "Desconocido",
       average: studentObj?.average ?? studentObj?.avg ?? "N/A"
     };
 
-    const courseInfoRaw = await fetchCourseInfo(courseId);
-    let courseData = null;
-    if (courseInfoRaw?.result && Array.isArray(courseInfoRaw.result)) {
-      courseData = courseInfoRaw.result[0];
-    } else if (courseInfoRaw?.course && Array.isArray(courseInfoRaw.course)) {
-      courseData = courseInfoRaw.course[0];
-    } else if (Array.isArray(courseInfoRaw)) {
-      courseData = courseInfoRaw[0];
-    } else if (typeof courseInfoRaw === "object") {
-      courseData = courseInfoRaw;
-    }
+   const courseInfoRaw = await fetchCourseInfo(courseId);
+   const courseData = courseInfoRaw?.course || courseInfoRaw || {};
 
     const instructorArr = ensureArray(courseInfoRaw?.instructor || courseInfoRaw?.instructors);
     const course = {
