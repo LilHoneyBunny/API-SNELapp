@@ -66,7 +66,7 @@ const contentHandlers = {
 
       callback(null, {
         success: true,
-        files: result.data.map(f => ({ fileId: f.fileId, url: f.fileUrl, fileType: f.fileType})),
+        files: result.data.map(f => ({ fileId: f.fileId, url: f.fileUrl, fileType: f.fileType, originalName: f.originalName})),
         message: "Files retrieved successfully"
       });
     } catch (error) {
