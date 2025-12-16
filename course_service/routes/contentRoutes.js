@@ -2,7 +2,7 @@ const {Router} = require ('express');
 const router = Router();
 const {createNewContent, updateContent, deleteContent, getContentByCourse,
     getContentByTitleController, getContentByDateController} = require('../controller/contentController');
-const {downloadFile, getFilesByContentController} = require ('../controller/contentFileController');
+const {downloadFile, getFilesByContentController, viewContentFileController} = require ('../controller/contentFileController');
 
 /**
  * @swagger
@@ -231,5 +231,29 @@ router.get("/files/download/:filename", downloadFile);
  *         description: Server error
  */
 router.get('/:contentId/files', getFilesByContentController);
+
+/**
+ * @swagger
+ * /content/files/view/{filename}:
+ *   get:
+ *     summary: View a content file
+ *     description: Displays a file (PDF) directly in the browser without downloading it.
+ *     tags: [Content]
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Stored filename of the uploaded file
+ *     responses:
+ *       200:
+ *         description: File displayed successfully
+ *       404:
+ *         description: File not found
+ *       500:
+ *         description: Error displaying file
+ */
+router.get("/files/view/:filename", viewContentFileController);
 
 module.exports = router;

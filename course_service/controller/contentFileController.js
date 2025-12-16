@@ -50,7 +50,28 @@ const getFilesByContentController = async (req, res) => {
 
         const result = await getFilesByContent(contentId);
 
+        if (!result.success) {
         return res.status(result.status).json(result);
+        }
+
+        const files = result.data.map(file => {
+            const filename = path.basename(file.fileUrl);
+
+            return {
+                fileId: file.fileId,
+                contentId: file.contentId,
+                originalName: file.originalName,
+                fileType: file.fileType,
+                viewUrl: `/minao_systems/content/files/view/${encodeURIComponent(filename)}`
+            };
+        });
+
+
+        return res.status(HttpStatusCodes.OK).json({
+            success: true,
+            status: HttpStatusCodes.OK,
+            data: files
+        });
 
     } catch (error) {
         console.error("Error en getFilesByContentController:", error);
@@ -86,4 +107,40 @@ const downloadFile = (req, res) => {
   res.download(filePath);
 };
 
-module.exports = {uploadContentFile, getFilesByContentController, deleteFileController, downloadFile};
+const viewContentFileController = async (req, res) => {
+    try {
+        const filename = decodeURIComponent(req.params.filename);
+
+        const filePath = path.resolve(
+            __dirname,
+            "..",        
+            "uploads",   
+            filename
+        );
+
+        if (!fs.existsSync(filePath)) {
+            return res.status(HttpStatusCodes.NOT_FOUND).json({
+                success: false,
+                status: HttpStatusCodes.NOT_FOUND,
+                message: "File not found"
+            });
+        }
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+            "Content-Disposition",
+            `inline; filename="${filename}"`
+        );
+        return res.sendFile(filePath);
+
+    } catch (error) {
+        console.error("Error viewContentFileController:", error);
+        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            status: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+            message: "Error displaying file"
+        });
+    }
+};
+
+module.exports = {uploadContentFile, getFilesByContentController, deleteFileController, downloadFile, viewContentFileController};
