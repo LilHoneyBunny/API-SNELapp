@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getStudentCourseReport, getStudentQuizResults} = require('../controller/reportController');
+const { getStudentCourseReport, getStudentQuizResults, viewReportStudent} = require('../controller/reportController');
 
 /**
  * @swagger
@@ -8,6 +8,38 @@ const { getStudentCourseReport, getStudentQuizResults} = require('../controller/
  *   name: Report
  *   description: Endpoints for managing reports
  */
+
+/**
+ * @swagger
+ * /report/student/{studentUserId}/course/{cursoId}/view:
+ *   get:
+ *     summary: Visualiza el reporte individual del estudiante en un curso
+ *     description: >
+ *       Genera y devuelve el reporte del estudiante en formato HTML para su
+ *       visualización directa en el sistema.
+ *     tags: [Report]
+ *     parameters:
+ *       - in: path
+ *         name: studentUserId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del estudiante en el microservicio de usuarios
+ *       - in: path
+ *         name: cursoId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del curso
+ *     responses:
+ *       200:
+ *         description: Reporte HTML generado exitosamente para visualización
+ *       400:
+ *         description: Parámetros faltantes o inválidos
+ *       500:
+ *         description: Error interno al generar el reporte
+ */
+router.get('/student/:studentUserId/course/:cursoId/view', viewReportStudent);
 
 /**
  * @swagger
@@ -67,6 +99,5 @@ router.get('/student/:studentUserId/course/:cursoId', getStudentCourseReport);
  *         description: Error interno
  */
 router.get('/:quizId/students/:studentUserId/results', getStudentQuizResults);
-
 
 module.exports = router;

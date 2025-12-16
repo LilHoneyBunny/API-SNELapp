@@ -58,7 +58,7 @@ const getAllCoursesByInstructor = async (instructorUserId) => {
   try {
     const [rows] = await db.execute(
       `SELECT cursoId, name, description, category, startDate, endDate, state
-       FROM Curso WHERE instructorUserId = ?`,
+       FROM Curso WHERE instructorUserId = ? and state = 'Activo' `,
       [instructorUserId]
     );
     return rows;
