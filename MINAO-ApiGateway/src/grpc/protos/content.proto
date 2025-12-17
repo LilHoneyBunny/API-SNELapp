@@ -6,6 +6,7 @@ service ContentService {
   rpc UploadContentFile (stream UploadContentFileChunk) returns (UploadContentFileResponse);
   rpc GetFilesByContent (GetFilesByContentRequest) returns (GetFilesByContentResponse);
   rpc DeleteFile (DeleteFileRequest) returns (DeleteFileResponse);
+  rpc GetFileById (GetFileByIdRequest) returns (GetFileByIdResponse);
 }
 
 message UploadContentFileChunk {
@@ -45,4 +46,14 @@ message DeleteFileRequest {
 message DeleteFileResponse {
   bool success = 1;
   string message = 2;
+}
+
+message GetFileByIdRequest {
+  int32 fileId = 1;
+}
+
+message GetFileByIdResponse {
+  bytes data = 1;
+  string fileName = 2;
+  string fileType = 3;
 }
