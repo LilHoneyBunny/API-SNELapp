@@ -129,10 +129,10 @@ const viewContentFileController = async (req, res) => {
 
         const contentType = mime.lookup(filePath) || "application/octet-stream";
         res.setHeader("Content-Type", contentType);
-        res.setHeader(
+        /*res.setHeader(
             "Content-Disposition",
             `inline; filename="${filename}"`
-        );
+        );*/
         return res.sendFile(filePath);
 
     } catch (error) {

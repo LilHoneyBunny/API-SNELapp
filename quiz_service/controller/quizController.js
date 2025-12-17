@@ -148,7 +148,6 @@ const deleteQuestionnaire = async (req, res = response) => {
 const getQuizzesByCourse = async (req, res = response) => {
     try {
         const { cursoId } = req.params;
-
         if (!cursoId) {
             return res.status(HttpStatusCodes.BAD_REQUEST).json({
                 error: true,
@@ -158,7 +157,6 @@ const getQuizzesByCourse = async (req, res = response) => {
         }
 
         const quizzes = await getAllQuiz(cursoId);
-
         return res.status(HttpStatusCodes.OK).json({
             success: true,
             data: quizzes
