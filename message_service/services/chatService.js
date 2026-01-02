@@ -1,6 +1,6 @@
 const events = require('../events/events');
 const {ValidateChat} = require('../validations/generalValidations');
-import {STUDENT, SEND_MESSAGE_EVENT} from '../utils/constants';
+const {STUDENT, SEND_MESSAGE_EVENT} = require('../utils/constants');
 
 async function CreateChatAsync(IdStudent, IdInstructor, chat) {
     
