@@ -11,7 +11,7 @@ const ErrorsHandler = require('./middlewares/errorsHandler');
 const app = express();
 app.use(express.json());
 
-app.use('/minao_systems/messages', require('./routes/chatRoutes'));
+app.use('/minao_systems/chats', require('./routes/chatRoutes'));
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(ErrorsHandler);
 
