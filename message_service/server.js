@@ -34,11 +34,11 @@ io.on('connection', (socket) => {
 SendRealTimeMessage(io);
 
 //===MONGODB===
-mongoose.connect(process.env.MONGODB_URI_DEVELOPMENT) // Cambia a MONGODB_URI_DEVELOPMENT si estás en desarrollo
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Conectado a MongoDB'))
   .catch((err) => console.error('Error conectando a MongoDB:', err));
 
 //==ARRANCAR SERVER===
-server.listen(process.env.PORT_DEVELOPMENT, () => { //Cambiar a PORT_DEVELOPMENT para desarrollo
+server.listen(process.env.SERVER_PORT, () => {
   console.log('Servidor en puerto 5002');
 });
