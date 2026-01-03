@@ -22,13 +22,13 @@ const ChatSchema = new mongoose.Schema({
     },
     IdStudent: Number,
     IdInstructor: Number,
-    Message: {
+    Messages: {
         type: [MessageSchema]
     }
 })
 
 ChatSchema.plugin(AutoIncrement, {
-    inc_field: 'idChat',
+    inc_field: 'IdChat',
     start_seq: 1,
 });
 
