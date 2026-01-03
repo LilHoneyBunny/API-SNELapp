@@ -13,7 +13,7 @@ const createReflectionHandlers = require('../grpc/reflection/reflectionHandlers'
 class Server {
     constructor() {
         this.app = express();
-        this.port = process.env.SERVER_PORT;
+        this.port = process.env.SERVER_PORT || 8000;
 
         this.middleware();
         this.routes();
@@ -30,7 +30,7 @@ class Server {
         this.app.use(express.json({ limit: '50mb' }));
         this.app.use(express.urlencoded({ limit: '50mb', extended: true }));
         this.app.use(express.static('public'));
-        this.app.use("/uploads",express.static(path.join(__dirname, "..", "uploads")));
+        this.app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
     }
 
     routes() {
@@ -57,14 +57,15 @@ class Server {
         );
 
         const grpcObj = grpc.loadPackageDefinition(packageDef);
-
         const server = new grpc.Server();
 
+        // Content service
         server.addService(
             grpcObj.content.ContentService.service,
             contentHandlers
         );
 
+        // Reflection service
         const reflectionHandlers = createReflectionHandlers(
             { "content.ContentService": protoPath },
             [protoPath, reflectionProtoPath]
@@ -76,11 +77,16 @@ class Server {
         );
 
         server.bindAsync(
-            '0.0.0.0:50051',
+            '0.0.0.0:50052',
             grpc.ServerCredentials.createInsecure(),
-            () => {
-                console.log("gRPC server running on port 50051");
-                server.start();
+            (err, port) => {
+                if (err) {
+                    console.error('❌ Error binding gRPC server:', err);
+                    return;
+                }
+
+                console.log(`✅ gRPC server running on port ${port}`);
+                // 🚫 NO server.start() (grpc-js moderno)
             }
         );
     }
@@ -94,4 +100,3 @@ class Server {
 }
 
 module.exports = Server;
-
