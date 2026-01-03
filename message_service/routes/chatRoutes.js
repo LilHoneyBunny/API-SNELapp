@@ -38,14 +38,14 @@ router.post('/:idStudent/:idInstructor', CreateChatControllerAsync);
 
 /**
  * @swagger
- * /chats/{userId}:
+ * /chats/{idUser}:
  *   get:
  *     summary: Obtener todos los Chats de un usuario
  *     tags:
  *       - Chat
  *     parameters:
  *       - in: path
- *         name: userId
+ *         name: idUser
  *         required: true
  *         schema:
  *           type: int
@@ -58,7 +58,7 @@ router.post('/:idStudent/:idInstructor', CreateChatControllerAsync);
  *       404:
  *         description: No se encontraron Chats
  */
-router.get('/:userId', LoadChatsControllerAsync);
+router.get('/:idUser', LoadChatsControllerAsync);
 
 /**
  * @swagger
