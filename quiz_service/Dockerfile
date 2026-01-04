@@ -1,5 +1,5 @@
 # Usamos una imagen base de Node.js
-FROM node:14
+FROM node:20
 
 
 # 1. Modificar sources.list para usar repositorios de archivo
@@ -21,7 +21,7 @@ COPY . .
 RUN npm install
 
 # Exponemos el puerto que utilizamos en el contenedor
-EXPOSE 3001
+EXPOSE 3000
 
 # Comando para arrancar el microservicio
-CMD ["npm", "start"]
+CMD ["node", "app"]

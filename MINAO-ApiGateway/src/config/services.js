@@ -1,7 +1,8 @@
 
 
 module.exports = {
-  usersService: 'http://localhost:3000',
-  coursesService: 'http://localhost:8000',
-  quizzesService: 'http://localhost:5050'
+  usersService: 'http://users_service:3000',
+  coursesService: 'http://courses_service:3000',
+  quizzesService: 'http://quizzes_service:3000',
+  chatsService: 'http://chats_service:3000'
 };

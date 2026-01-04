@@ -1,3 +1,5 @@
+const { ALUMNO, INSTRUCTOR_ESP } = require("../utils/constants");
+
 function ValidateId(id, object) {
     if (!id) {
         throw { statusCode: 400, mensaje: `La id del ${object} es nula.` };
@@ -11,7 +13,7 @@ function ValidateUserType(userType) {
     if (!userType) {
         throw { statusCode: 400, mensaje: `El tipo de usuario es nulo.` };
     }
-    if (userType != "alumno" && userType != "instructor") {
+    if (userType != ALUMNO && userType != INSTRUCTOR_ESP) {
         throw { statusCode: 400, mensaje: `El tipo de usuario '${userType}' es inválido.` };
     }
 }

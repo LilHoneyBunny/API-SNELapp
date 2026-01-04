@@ -22,8 +22,8 @@ app.use('/minao_systems/quizzes', require('./routes/quizzes.routes'));
 app.use('/minao_systems/scores', require('./routes/quizzes.routes'));
 app.use('/minao_systems/report', require('./routes/quizzes.routes'));
 
+app.use('/minao_systems/chats', require('./routes/chats.routes'));
 
-
-app.listen(3002, () => {
-  console.log('API Gateway running on port 3002');
+app.listen(3001, () => {
+  console.log('API Gateway running on port 3001');
 });

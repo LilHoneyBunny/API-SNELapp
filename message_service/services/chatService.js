@@ -1,11 +1,11 @@
 const events = require('../events/events');
 const {ValidateChat} = require('../validations/generalValidations');
-import {STUDENT, SEND_MESSAGE_EVENT} from '../utils/constants';
+const {STUDENT, SEND_MESSAGE_EVENT} = require('../utils/constants');
 
 async function CreateChatAsync(IdStudent, IdInstructor, chat) {
     
     const newChat = new chat({
-        IdChat: IdStudent,
+        IdStudent: IdStudent,
         IdInstructor: IdInstructor
     });
 
@@ -22,9 +22,9 @@ async function CreateChatAsync(IdStudent, IdInstructor, chat) {
 
 async function LoadChatAsync(idUser, userType, chat) {
     const filter =
-        userType === STUDENT 
-        ? { idUser: idUser } 
-        : { idUser: idUser };
+        userType == STUDENT 
+        ? { IdStudent: idUser } 
+        : { IdInstructor: idUser };
     
     const chats = await chat.find(
         filter,
@@ -54,9 +54,9 @@ async function LoadMessagesAsync(IdChat, chat) {
     return foundChat?.Messages ?? [];
 }
 
-async function SendMessageAsync(IdChat, text, userType, chat) {
+async function SendMessageAsync(idChat, text, userType, chat) {
     const res = await chat.findOneAndUpdate(
-        { IdChat: IdChat },
+        { IdChat: idChat },
         {
             $push: {
                 Messages: {
@@ -69,10 +69,10 @@ async function SendMessageAsync(IdChat, text, userType, chat) {
         { new: true }
     );
 
-    ValidateChat(res, IdChat);
+    ValidateChat(res, idChat);
 
     events.emit(SEND_MESSAGE_EVENT, {
-        IdChat,
+        IdChat: idChat,
         Message: text,
     });
 

@@ -38,18 +38,27 @@ router.post('/:idStudent/:idInstructor', CreateChatControllerAsync);
 
 /**
  * @swagger
- * /chats/{userId}:
+ * /chats/{idUser}:
  *   get:
  *     summary: Obtener todos los Chats de un usuario
  *     tags:
  *       - Chat
  *     parameters:
  *       - in: path
- *         name: userId
+ *         name: idUser
  *         required: true
  *         schema:
  *           type: int
  *         description: ID del Usuario
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userType:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Chats encontrados
@@ -58,18 +67,18 @@ router.post('/:idStudent/:idInstructor', CreateChatControllerAsync);
  *       404:
  *         description: No se encontraron Chats
  */
-router.get('/:userId', LoadChatsControllerAsync);
+router.get('/:idUser', LoadChatsControllerAsync);
 
 /**
  * @swagger
- * /chats/{chatId}/messages:
+ * /chats/{idChat}/messages:
  *   get:
  *     summary: Obtener los Mensajes de un Chat
  *     tags:
  *       - Chat
  *     parameters:
  *       - in: path
- *         name: chatId
+ *         name: idChat
  *         required: true
  *         schema:
  *           type: int
@@ -82,18 +91,18 @@ router.get('/:userId', LoadChatsControllerAsync);
  *       404:
  *         description: No se encontraron Mensajes
  */
-router.get('/:chatId/messages', LoadMessagesControllerAsync);
+router.get('/:idChat/messages', LoadMessagesControllerAsync);
 
 /**
  * @swagger
- * /chats/{chatId}:
+ * /chats/{idChat}:
  *   put:
  *     summary: Enviar un mensaje en un Chat.
  *     tags:
  *       - Chat
  *     parameters:
  *       - in: path
- *         name: chatId
+ *         name: idChat
  *         required: true
  *         schema:
  *           type: int
@@ -105,9 +114,9 @@ router.get('/:chatId/messages', LoadMessagesControllerAsync);
  *           schema:
  *             type: object
  *             properties:
- *               texto:
+ *               text:
  *                 type: string
- *               tipoUsuario:
+ *               userType:
  *                 type: string
  *     responses:
  *       201:
@@ -115,6 +124,6 @@ router.get('/:chatId/messages', LoadMessagesControllerAsync);
  *       400:
  *         description: Parámetros inválidos
  */
-router.put('/:chatId', SendMessageControllerAsync);
+router.put('/:idChat', SendMessageControllerAsync);
 
 module.exports = router;

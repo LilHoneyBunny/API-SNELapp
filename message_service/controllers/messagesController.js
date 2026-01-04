@@ -1,8 +1,8 @@
 const {response} = require('express');
-const Chat = require('../models/Chat');
+const Chat = require('../models/chat');
 const {CreateChatAsync, LoadChatAsync, LoadMessagesAsync, SendMessageAsync} = require('../services/chatService');
 const {ValidateId, ValidateUserType} = require('../validations/generalValidations');
-import { ALUMNO, INSTRUCTOR_ESP, USUARIO, CHAT } from '../utils/constants';
+const { ALUMNO, INSTRUCTOR_ESP, USUARIO, CHAT }  = require('../utils/constants');
 
 async function CreateChatControllerAsync(req, res = response, next) {
     try {

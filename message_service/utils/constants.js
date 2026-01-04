@@ -1,9 +1,11 @@
-export const STUDENT = "student";
-export const INSTRUCTOR = "instructor";
+const STUDENT = "student";
+const INSTRUCTOR = "instructor";
 
-export const SEND_MESSAGE_EVENT = "SendMessage";
+const SEND_MESSAGE_EVENT = "SendMessage";
 
-export const ALUMNO = "Alumno";
-export const INSTRUCTOR_ESP = "Instructor";
-export const USUARIO = "Usuario";
-export const CHAT = "Chat";
+const ALUMNO = "Alumno";
+const INSTRUCTOR_ESP = "Instructor";
+const USUARIO = "Usuario";
+const CHAT = "Chat";
+
+module.exports = {STUDENT, INSTRUCTOR, SEND_MESSAGE_EVENT, ALUMNO, INSTRUCTOR_ESP, USUARIO, CHAT};
