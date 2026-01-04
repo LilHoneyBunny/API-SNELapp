@@ -50,15 +50,6 @@ router.post('/:idStudent/:idInstructor', CreateChatControllerAsync);
  *         schema:
  *           type: int
  *         description: ID del Usuario
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               userType:
- *                 type: string
  *     responses:
  *       200:
  *         description: Chats encontrados

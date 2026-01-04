@@ -22,10 +22,8 @@ async function LoadChatsControllerAsync(req, res = response, next) {
     try {
         const {idUser} = req.params;
         ValidateId (idUser, USUARIO);
-        const {userType} = req.body;
-        ValidateUserType(userType);
 
-        const chats = await LoadChatAsync(idUser, userType, Chat);
+        const chats = await LoadChatAsync(idUser, Chat);
 
         res.status(200).json(chats);
     } catch(err) {

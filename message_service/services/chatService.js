@@ -20,14 +20,9 @@ async function CreateChatAsync(IdStudent, IdInstructor, chat) {
     };
 }
 
-async function LoadChatAsync(idUser, userType, chat) {
-    const filter =
-        userType == STUDENT 
-        ? { IdStudent: idUser } 
-        : { IdInstructor: idUser };
-    
-    const chats = await chat.find(
-        filter,
+async function LoadChatAsync(idUser, chat) {
+    var chats = await chat.find(
+        { IdStudent: idUser },
         {
             _id: 0,
             IdChat: 1,
@@ -36,6 +31,19 @@ async function LoadChatAsync(idUser, userType, chat) {
             message: { $slice: -1 },
         }
     ).lean();
+
+    if (chats.length == 0) {
+        chats = await chat.find(
+            { IdInstructor: idUser },
+            {
+                _id: 0,
+                IdChat: 1,
+                IdStudent: 1,
+                IdInstructor: 1,
+                message: { $slice: -1 },
+            }
+        ).lean();
+    } 
 
     return chats.map((chat) => ({
         IdChat: chat.IdChat,

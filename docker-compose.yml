@@ -48,7 +48,7 @@ services:
     image: mongo:8.2
     container_name: mongo_chats
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - "chats_data:/data/db"
 
