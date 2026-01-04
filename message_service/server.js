@@ -40,5 +40,5 @@ mongoose.connect(process.env.MONGODB_URI)
 
 //==ARRANCAR SERVER===
 server.listen(process.env.SERVER_PORT, () => {
-  console.log('Servidor en puerto 5002');
+  console.log('Servidor en puerto 3000');
 });

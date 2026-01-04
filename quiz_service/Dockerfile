@@ -1,5 +1,5 @@
 # Usamos una imagen base de Node.js
-FROM node:14
+FROM node:20
 
 
 # 1. Modificar sources.list para usar repositorios de archivo
@@ -24,4 +24,4 @@ RUN npm install
 EXPOSE 3000
 
 # Comando para arrancar el microservicio
-CMD ["npm", "start"]
+CMD ["node", "app"]

@@ -1,5 +1,5 @@
 const {response} = require('express');
-const Chat = require('../models/Chat');
+const Chat = require('../models/chat');
 const {CreateChatAsync, LoadChatAsync, LoadMessagesAsync, SendMessageAsync} = require('../services/chatService');
 const {ValidateId, ValidateUserType} = require('../validations/generalValidations');
 const { ALUMNO, INSTRUCTOR_ESP, USUARIO, CHAT }  = require('../utils/constants');
