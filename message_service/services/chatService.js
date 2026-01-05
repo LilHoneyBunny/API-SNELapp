@@ -1,6 +1,6 @@
 const events = require('../events/events');
 const {ValidateChat} = require('../validations/generalValidations');
-const {STUDENT, SEND_MESSAGE_EVENT} = require('../utils/constants');
+const {SEND_MESSAGE_EVENT} = require('../utils/constants');
 
 async function CreateChatAsync(IdStudent, IdInstructor, chat) {
     
@@ -28,7 +28,7 @@ async function LoadChatAsync(idUser, chat) {
             IdChat: 1,
             IdStudent: 1,
             IdInstructor: 1,
-            message: { $slice: -1 },
+            Messages: { $slice: -1 },
         }
     ).lean();
 
@@ -40,7 +40,7 @@ async function LoadChatAsync(idUser, chat) {
                 IdChat: 1,
                 IdStudent: 1,
                 IdInstructor: 1,
-                message: { $slice: -1 },
+                Messages: { $slice: -1 },
             }
         ).lean();
     } 
@@ -49,7 +49,7 @@ async function LoadChatAsync(idUser, chat) {
         IdChat: chat.IdChat,
         IdStudent: chat.IdStudent,
         IdInstructor: chat.IdInstructor,
-        lastMessage: chat.Message?.[0] ?? null,
+        LastMessage: chat.Messages?.[0]?.Text ?? null,
     }));
 }
 

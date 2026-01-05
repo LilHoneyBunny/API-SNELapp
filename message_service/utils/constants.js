@@ -1,5 +1,5 @@
-const STUDENT = "student";
-const INSTRUCTOR = "instructor";
+const STUDENT = "Student";
+const INSTRUCTOR = "Instructor";
 
 const SEND_MESSAGE_EVENT = "SendMessage";
 

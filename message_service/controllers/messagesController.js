@@ -2,13 +2,13 @@ const {response} = require('express');
 const Chat = require('../models/chat');
 const {CreateChatAsync, LoadChatAsync, LoadMessagesAsync, SendMessageAsync} = require('../services/chatService');
 const {ValidateId, ValidateUserType} = require('../validations/generalValidations');
-const { ALUMNO, INSTRUCTOR_ESP, USUARIO, CHAT }  = require('../utils/constants');
+const { STUDENT, INSTRUCTOR, USUARIO, CHAT }  = require('../utils/constants');
 
 async function CreateChatControllerAsync(req, res = response, next) {
     try {
         const {idStudent, idInstructor} = req.params;
-        ValidateId(idStudent, ALUMNO);
-        ValidateId(idInstructor, INSTRUCTOR_ESP);
+        ValidateId(idStudent, STUDENT);
+        ValidateId(idInstructor, INSTRUCTOR);
 
         const idChat = await CreateChatAsync(idStudent, idInstructor, Chat);
         
