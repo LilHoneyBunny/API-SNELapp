@@ -21,16 +21,18 @@ async function CreateChatAsync(IdStudent, IdInstructor, chat) {
 }
 
 async function FindChatAsync(IdStudent, IdInstructor, chat) {
-    var chats = await chat.findOne(
+    var chat = await chat.findOne(
         { IdStudent: IdStudent, IdInstructor: IdInstructor },
         {
             IdChat: 1,
         }
     ).lean();
 
-    return chats.map((chat) => ({
+    ValidateChat(chat, chat?.idChat);
+
+    return {
         IdChat: chat.IdChat
-    }));
+    };
 }
 
 async function LoadChatsAsync(idUser, chat) {
