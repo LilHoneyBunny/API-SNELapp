@@ -1,6 +1,6 @@
 const {response} = require('express');
 const Chat = require('../models/chat');
-const {CreateChatAsync, LoadChatAsync, LoadMessagesAsync, SendMessageAsync} = require('../services/chatService');
+const {CreateChatAsync, FindChatAsync, LoadChatsAsync, LoadMessagesAsync, SendMessageAsync} = require('../services/chatService');
 const {ValidateId, ValidateUserType} = require('../validations/generalValidations');
 const { STUDENT, INSTRUCTOR, USUARIO, CHAT }  = require('../utils/constants');
 
@@ -18,12 +18,26 @@ async function CreateChatControllerAsync(req, res = response, next) {
     }
 }
 
+async function FindChatControllerAsync(req, res = response, next) {
+    try {
+        const {idStudent, idInstructor} = req.params;
+        ValidateId(idStudent, STUDENT);
+        ValidateId(idInstructor, INSTRUCTOR);
+
+        const idChat = await FindChatAsync(idStudent, idInstructor, Chat);
+        
+        return res.status(200).json(idChat);
+    } catch(err) {
+        next(err);
+    }
+}
+
 async function LoadChatsControllerAsync(req, res = response, next) {
     try {
         const {idUser} = req.params;
         ValidateId (idUser, USUARIO);
 
-        const chats = await LoadChatAsync(idUser, Chat);
+        const chats = await LoadChatsAsync(idUser, Chat);
 
         res.status(200).json(chats);
     } catch(err) {
@@ -59,4 +73,4 @@ async function SendMessageControllerAsync(req, res = response, next) {
     }
 }
 
-module.exports = {CreateChatControllerAsync, LoadChatsControllerAsync, LoadMessagesControllerAsync, SendMessageControllerAsync};
+module.exports = {CreateChatControllerAsync, FindChatControllerAsync, LoadChatsControllerAsync, LoadMessagesControllerAsync, SendMessageControllerAsync};

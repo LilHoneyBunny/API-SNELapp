@@ -20,7 +20,20 @@ async function CreateChatAsync(IdStudent, IdInstructor, chat) {
     };
 }
 
-async function LoadChatAsync(idUser, chat) {
+async function FindChatAsync(IdStudent, IdInstructor, chat) {
+    var chats = await chat.findOne(
+        { IdStudent: IdStudent, IdInstructor: IdInstructor },
+        {
+            IdChat: 1,
+        }
+    ).lean();
+
+    return chats.map((chat) => ({
+        IdChat: chat.IdChat
+    }));
+}
+
+async function LoadChatsAsync(idUser, chat) {
     var chats = await chat.find(
         { IdStudent: idUser },
         {
@@ -88,4 +101,4 @@ async function SendMessageAsync(idChat, text, userType, chat) {
     return Message[Message.length - 1];
 }
 
-module.exports = {CreateChatAsync, LoadChatAsync, LoadMessagesAsync, SendMessageAsync};
+module.exports = {CreateChatAsync, FindChatAsync, LoadChatsAsync, LoadMessagesAsync, SendMessageAsync};
