@@ -9,5 +9,11 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.14.3",
+    "axios": "^1.13.2",
+    "chartjs-node-canvas": "^5.0.0",
+    "puppeteer": "^24.34.0"
   }
 }

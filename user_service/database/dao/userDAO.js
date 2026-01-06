@@ -227,6 +227,18 @@ const getStudentsByIds = async (studentIds) => {
     }
 };
 
+const updateUserPasswordById = async (userId, passwordHash) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const sql = "UPDATE User SET userPassword = ? WHERE userId = ?";
+        const [result] = await dbConnection.execute(sql, [passwordHash, userId]);
+        return result;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+
 module.exports = {
     createUser,
     findUserByEmail,
@@ -235,5 +247,6 @@ module.exports = {
     updateUserVerification,
     getStudentsByIds,
     updateUserBasicProfile,
-    findUserByEmailJSON
+    findUserByEmailJSON,
+    updateUserPasswordById
 };
