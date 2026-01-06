@@ -74,5 +74,28 @@ const getStudentQuizResults = async (req, res) => {
     }
 };
 
-module.exports = {getStudentCourseReport, getStudentQuizResults};
+const viewReportStudent = async (req, res) => {
+  try {
+    const { studentUserId, cursoId } = req.params;
 
+    const data = await buildStudentCourseReportData(studentUserId, cursoId);
+    const html = generateStudentCourseHTML(data);
+
+    return res
+      .status(HttpStatusCodes.OK)
+      .set("Content-Type", "text/html")
+      .send(html);
+      
+  } catch (error) {
+    console.error("viewStudentCourseReport error:", error.message);
+    return res
+      .status(HttpStatusCodes.INTERNAL_SERVER_ERROR)
+      .json({
+        error: "Error visualizing student report",
+        detail: error.message
+      });
+
+  }
+
+};
+module.exports = {getStudentCourseReport, getStudentQuizResults, viewReportStudent};

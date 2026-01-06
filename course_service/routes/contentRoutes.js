@@ -2,6 +2,7 @@ const {Router} = require ('express');
 const router = Router();
 const {createNewContent, updateContent, deleteContent, getContentByCourse,
     getContentByTitleController, getContentByDateController} = require('../controller/contentController');
+const {downloadFile, getFilesByContentController, viewContentFileController} = require ('../controller/contentFileController');
 
 /**
  * @swagger
@@ -147,31 +148,6 @@ router.get('/byCourse/:cursoId', getContentByCourse);
  *     responses:
  *       200:
  *         description: Content found successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 contents:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       contentId:
- *                         type: integer
- *                       title:
- *                         type: string
- *                       type:
- *                         type: string
- *                       descripcion:
- *                         type: string
- *                       cursoId:
- *                         type: integer
- *                       publishDate:
- *                         type: string
- *                         format: date-time
- *                       file:
- *                         $ref: '#/components/schemas/ContentFile'
  *       400:
  *         description: Missing query parameter
  *       500:
@@ -203,36 +179,81 @@ router.get('/search/by-title', getContentByTitleController);
  *     responses:
  *       200:
  *         description: Content found successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 contents:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       contentId:
- *                         type: integer
- *                       title:
- *                         type: string
- *                       type:
- *                         type: string
- *                       descripcion:
- *                         type: string
- *                       cursoId:
- *                         type: integer
- *                       publishDate:
- *                         type: string
- *                         format: date-time
- *                       file:
- *                         $ref: '#/components/schemas/ContentFile'
  *       400:
  *         description: Missing startDate or endDate query parameter
  *       500:
  *         description: Server error
  */
 router.get('/search/by-date', getContentByDateController);
+
+/**
+ * @swagger
+ * /content/files/download/{filename}:
+ *   get:
+ *     summary: Download a content file
+ *     tags: [Content]
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Name of the file to download
+ *     responses:
+ *       200:
+ *         description: File downloaded successfully
+ *       404:
+ *         description: File not found
+ *       500:
+ *         description: Server error
+ */
+router.get("/files/download/:filename", downloadFile);
+
+/**
+ * @swagger
+ * /content/{contentId}/files:
+ *   get:
+ *     summary: Get files associated with a content
+ *     tags: [Content]
+ *     parameters:
+ *       - in: path
+ *         name: contentId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the content
+ *     responses:
+ *       200:
+ *         description: Files retrieved successfully
+ *       404:
+ *         description: No files found for this content
+ *       500:
+ *         description: Server error
+ */
+router.get('/:contentId/files', getFilesByContentController);
+
+/**
+ * @swagger
+ * /content/files/view/{filename}:
+ *   get:
+ *     summary: View a content file
+ *     description: Displays a file (PDF) directly in the browser without downloading it.
+ *     tags: [Content]
+ *     parameters:
+ *       - in: path
+ *         name: filename
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Stored filename of the uploaded file
+ *     responses:
+ *       200:
+ *         description: File displayed successfully
+ *       404:
+ *         description: File not found
+ *       500:
+ *         description: Error displaying file
+ */
+router.get("/files/view/:filename", viewContentFileController);
 
 module.exports = router;

@@ -1,9 +1,8 @@
 const { Router } = require('express');
 const router = Router();
-const { registerUser, userLogin, verifyUser, fetchStudents} = require('../controllers/userController');
-const uploadProfileImage = require("../middleware/uploadProfileImage");
+
+const { registerUser, userLogin, verifyUser, fetchStudents, findUserByEmailJSONController, updateUserBasicProfileController, changePasswordController } = require('../controllers/userController');
 const { verifyToken } = require('../middleware/authMiddleware');
-const { updateUserBasicProfile } = require("../controllers/profileController");
 
 /**
  * @swagger
@@ -35,6 +34,7 @@ const { updateUserBasicProfile } = require("../controllers/profileController");
  */
 router.post('/registerUser', registerUser);
 
+
 /**
  * @swagger
  * /users/login:
@@ -61,6 +61,7 @@ router.post('/registerUser', registerUser);
  *         description: Error interno del servidor
  */
 router.post('/login', userLogin);
+
 
 /**
  * @swagger
@@ -89,57 +90,7 @@ router.post('/login', userLogin);
  */
 router.post('/verify', verifyUser);
 
-/**
- * @swagger
- * /users/{id}:
- *   put:
- *     summary: Actualizar perfil básico de usuario (nombre, apellidos, foto)
- *     tags: [Users]
- *     consumes:
- *       - multipart/form-data
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *       - in: formData
- *         name: userName
- *         type: string
- *       - in: formData
- *         name: paternalSurname
- *         type: string
- *       - in: formData
- *         name: maternalSurname
- *         type: string
- *       - in: formData
- *         name: profileImage
- *         type: file
- *     responses:
- *       200:
- *         description: Perfil actualizado correctamente
- *       400:
- *         description: Datos inválidos
- *       500:
- *         description: Error del servidor
- */
-router.put('/:id',
-  verifyToken,           // Asegura que el usuario está autenticado
-  uploadProfileImage,     // Subir la imagen de perfil
-  (req, res, next) => {
-      // Revisa que el usuario sea el dueño del perfil
-      const { id } = req.params;
-      if (parseInt(id, 10) !== req.user.userId) {
-          return res.status(403).json({
-              error: true,
-              statusCode: 403,
-              details: "You can only edit your own profile"
-          });
-      }
-      next();
-  },
-  updateUserBasicProfile // Controlador para actualizar el perfil
-);
+
 
 /**
  * @swagger
@@ -162,7 +113,78 @@ router.put('/:id',
  *       500:
  *         description: Error del servidor
  */
-router.get('/', fetchStudents);
+router.get('/',  fetchStudents);
 
+
+/**
+ * @swagger
+ * /users/findUserByEmailJSON/{email}:
+ *   get:
+ *     summary: Obtiene toda la información de un usuario mediante su email
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: email
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: "Correo electrónico del usuario a consultar"
+ *     responses:
+ *       200:
+ *         description: Información del usuario obtenida correctamente
+ *       400:
+ *         description: Email faltante o inválido
+ *       404:
+ *         description: Usuario no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/findUserByEmailJSON/:email',  findUserByEmailJSONController);
+
+
+/**
+ * @swagger
+ * /users/updateBasicProfile/{userId}:
+ *   put:
+ *     summary: Actualiza el perfil básico del usuario (nombre, apellidos, foto)
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: "ID del usuario a actualizar"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userName:
+ *                 type: string
+ *               paternalSurname:
+ *                 type: string
+ *               maternalSurname:
+ *                 type: string
+ *               profileImageUrl:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Perfil actualizado correctamente
+ *       400:
+ *         description: Datos inválidos o faltantes
+ *       404:
+ *         description: Usuario no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put('/updateBasicProfile/:userId', updateUserBasicProfileController);
+
+
+
+router.post('/changePassword', verifyToken, changePasswordController);
 
 module.exports = router;
+

@@ -60,21 +60,34 @@ const createUser = async (user) => {
 
 const findUserByEmail = async (email) => {
     const query = 'SELECT email FROM User WHERE email = ?';
-    let idResult = null;
     try {
         const [rows] = await connection.execute(query, [email]);
-
-        if (rows.length > 0) {
-            idResult = rows[0].email;
-        }
-
+        return rows.length > 0 ? rows[0].email : null;
     } catch (error) {
         console.error("Find user by email error:", error);
         throw error;
     }
-
-    return idResult;
 };
+
+const findUserByEmailJSON = async (email) => {
+    const query = 'SELECT * FROM User WHERE email = ?';
+    try {
+        const [rows] = await connection.execute(query, [email]);
+
+        if (rows.length === 0) return null;
+
+        const user = rows[0];
+
+        user.isVerified = Boolean(user.isVerified);
+
+        return user; 
+    } catch (error) {
+        console.error("findUserByEmailJSON error:", error);
+        throw error;
+    }
+};
+
+
 
 const login = async (email, userPassword) => {
     const dbConnection = await connection.getConnection();
@@ -83,51 +96,45 @@ const login = async (email, userPassword) => {
         FROM User
         WHERE email = ? 
     `;
-    let loginResult = null;
 
     try {
         const [rows] = await dbConnection.execute(query, [email]);
 
-        if (rows.length > 0) {
-            const user = rows[0];
-            const isPasswordValid = await bcrypt.compare(userPassword, user.userPassword);
+        if (rows.length === 0) return null;
 
-            if (!isPasswordValid) {
-                return null;
-            }
+        const user = rows[0];
+        const isPasswordValid = await bcrypt.compare(userPassword, user.userPassword);
 
-            loginResult = {
-                userId: user.userId,
-                email: user.email,
-                role: user.userType,
-                name: user.userName,
-                paternalSurname: user.paternalSurname,
-                maternalSurname: user.maternalSurname
-            };
-        } 
+        if (!isPasswordValid) return null;
+
+        return {
+            userId: user.userId,
+            email: user.email,
+            role: user.userType,
+            name: user.userName,
+            paternalSurname: user.paternalSurname,
+            maternalSurname: user.maternalSurname
+        };
+
     } catch (error) {
         console.error("Login error:", error);
         throw error;
     } finally {
         dbConnection.release();
     }
-
-    return loginResult;
 };
 
-// Extra functions added below:
-
 const findUser = async (email) => {
-    const query = 'SELECT * FROM User WHERE email = ?';
     try {
-        const [rows] = await connection.execute(query, [email]);
+        const [rows] = await connection.execute('SELECT * FROM User WHERE email = ?', [email]);
         if (rows.length === 0) return null;
 
         const user = rows[0];
         user.isVerified = Boolean(user.isVerified);
         return user;
+
     } catch (error) {
-        console.error("Find user by email error:", error);
+        console.error("Find user error:", error);
         throw error;
     }
 };
@@ -146,24 +153,55 @@ const updateUserVerification = (email) => {
     });
 };
 
-const updateUserProfileBasic = async (userId, { userName, paternalSurname, maternalSurname, profileImageUrl }) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const [result] = await dbConnection.execute(
-            `UPDATE User 
-             SET userName = ?, paternalSurname = ?, maternalSurname = ?, profileImageUrl = ?
-             WHERE userId = ?`,
-            [userName, paternalSurname, maternalSurname, profileImageUrl, userId]
-        );
+async function updateUserBasicProfile(
+    userId,
+    { userName, paternalSurname, maternalSurname, profileImageUrl }
+) {
+    const db = await connection.getConnection();
 
+    try {
+        const fields = [];
+        const values = [];
+
+        if (userName !== undefined) {
+            fields.push("userName = ?");
+            values.push(userName);
+        }
+
+        if (paternalSurname !== undefined) {
+            fields.push("paternalSurname = ?");
+            values.push(paternalSurname);
+        }
+
+        if (maternalSurname !== undefined) {
+            fields.push("maternalSurname = ?");
+            values.push(maternalSurname);
+        }
+
+        if (profileImageUrl !== undefined) {
+            fields.push("profileImageUrl = ?");
+            values.push(profileImageUrl);
+        }
+
+        if (fields.length === 0) return { affectedRows: 0 };
+
+        const sql = `
+            UPDATE User
+            SET ${fields.join(", ")}
+            WHERE userId = ?
+        `;
+
+        values.push(userId);
+
+        const [result] = await db.execute(sql, values);
         return result;
-    } catch (error) {
-        console.error("Update user profile error:", error);
-        throw error;
+
     } finally {
-        dbConnection.release();
+        db.release();
     }
-};
+}
+
+
 
 const getStudentsByIds = async (studentIds) => {
     const dbConnection = await connection.getConnection();
@@ -179,7 +217,8 @@ const getStudentsByIds = async (studentIds) => {
             studentIds
         );
 
-        return rows; 
+        return rows;
+
     } catch (err) {
         console.error("Error in getStudentsByIds DAO:", err);
         return studentIds.map(id => ({ studentId: id, name: "Desconocido" }));
@@ -188,4 +227,26 @@ const getStudentsByIds = async (studentIds) => {
     }
 };
 
-module.exports = {createUser, findUserByEmail, login, findUser, updateUserVerification, updateUserProfileBasic, getStudentsByIds};
+const updateUserPasswordById = async (userId, passwordHash) => {
+    const dbConnection = await connection.getConnection();
+    try {
+        const sql = "UPDATE User SET userPassword = ? WHERE userId = ?";
+        const [result] = await dbConnection.execute(sql, [passwordHash, userId]);
+        return result;
+    } finally {
+        dbConnection.release();
+    }
+};
+
+
+module.exports = {
+    createUser,
+    findUserByEmail,
+    login,
+    findUser,
+    updateUserVerification,
+    getStudentsByIds,
+    updateUserBasicProfile,
+    findUserByEmailJSON,
+    updateUserPasswordById
+};

@@ -5,13 +5,12 @@ CREATE TABLE IF NOT EXISTS Quiz (
     quizId INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description VARCHAR(300),
-    creationDate DATE DEFAULT CURDATE(),
+    creationDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     numberQuestion INT,
     weighing DECIMAL(5,2),
     cursoId INT NOT NULL,
     status ENUM('Borrador','Activo','Inactivo') NOT NULL DEFAULT 'Borrador'
 );
-
 
 CREATE TABLE IF NOT EXISTS Question (
     questionId INT AUTO_INCREMENT PRIMARY KEY,
@@ -55,8 +54,8 @@ CREATE TABLE IF NOT EXISTS Score (
 
 CREATE TABLE IF NOT EXISTS Report (
     reportId INT AUTO_INCREMENT PRIMARY KEY,
-    cursoId INT NOT NULL,       
-    studentUserId INT,          
+    cursoId INT NOT NULL,
+    studentUserId INT,
     type ENUM('General','Por estudiante') NOT NULL,
     data JSON
 );

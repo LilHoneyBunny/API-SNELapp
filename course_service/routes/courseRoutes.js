@@ -1,13 +1,29 @@
 const { Router } = require('express');
 const router = Router();
+const { getAllCourses } = require('../database/dao/courseDAO');
 
-const {createCurso, setCourseState, updateCourse, getCourseDetailById, getCoursesByInstructor, joinCurso,
-    getCoursesByStudentController, getCoursesByNameController, getCoursesByCategoryController, getCoursesByMonthController,
-    getCoursesByStateController, deactivateCourse, unenrollStudentFromCourse, deleteStudentFromCourse, getCategory,
-    modifyCategory, getCourseReportInfo} = require('../controller/courseController');
-
-const { verifyToken, requireInstructor, requireStudent } = require('../middleware/authMiddleware');
-
+const {
+        createCurso,
+        setCourseState, 
+        updateCourse, 
+        getCourseDetailById,
+        getAllCoursesController, 
+        getCoursesByInstructor,
+        getCoursesByInstructorJSON,
+        joinCurso,
+        getCoursesByStudentController, 
+        getCoursesByNameController, 
+        getCoursesByCategoryController, 
+        getCoursesByMonthController,
+        getCoursesByStateController, 
+        deactivateCourse, 
+        unenrollStudentFromCourse, 
+        deleteStudentFromCourse, 
+        getCategory,
+        modifyCategory, 
+        getCourseReportInfo
+    } = require('../controller/courseController');
+ 
 
 /**
  * @swagger
@@ -115,6 +131,9 @@ router.patch('/updateCourse', updateCourse);
  */
 router.patch('/setCourseState', setCourseState);
 
+
+
+router.get('/all', getAllCoursesController);
 /**
  * @swagger
  * /courses/{courseId}:
@@ -160,6 +179,29 @@ router.get('/:courseId', getCourseDetailById);
  *         description: Server error
  */
 router.get('/instructor/:instructorId', getCoursesByInstructor);
+
+/**
+ * @swagger
+ * /courses/instructor/{instructorId}:
+ *   get:
+ *     summary: Get all courses created by an instructor
+ *     tags: [Courses]
+ *     parameters:
+ *       - in: path
+ *         name: instructorId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the instructor whose courses will be fetched
+ *     responses:
+ *       200:
+ *         description: Courses fetched successfully
+ *       404:
+ *         description: No courses found for this instructor
+ *       500:
+ *         description: Server error
+ */
+router.get('/instructor/:instructorId', getCoursesByInstructorJSON);
 
 /**
  * @swagger
@@ -378,8 +420,6 @@ router.get('/search/by-category', getCoursesByCategoryController);
  *         description: Server error
  */
 router.get('/search/by-month', getCoursesByMonthController);
-
-
 
 /**
  * @swagger

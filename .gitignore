@@ -1,9 +1,12 @@
 course_service/.env
-user_service/node_modules/
-course_service/node_modules/
-quiz_service/node_modules/
 user_service/.env
 quiz_service/.env
+message_service/.env
+user_service/node_modules
+course_service/node_modules
+quiz_service/node_modules
+message_service/node_modules
+MINAO-ApiGateway/node_modules
 .env
 .DS_Store
 *.log

@@ -13,7 +13,7 @@ class Server{
 
     middleware(){
         const corsOptions = {
-            origin: ["http://localhost:8085"],
+            origin: ["http://localhost:8085", "*"],
             methods: "GET,PUT,PATCH,POST,DELETE",
         };
 

@@ -1,7 +1,6 @@
 const {Router} = require ('express');
 const router = Router();
 const {getInstructor, fetchInstructor} = require('../controllers/instructorController');
-const uploadProfileImage = require("../middleware/uploadProfileImage");
 const { updateInstructorProfileController } = require("../controllers/profileController");
 
 
@@ -35,7 +34,7 @@ const { updateInstructorProfileController } = require("../controllers/profileCon
  */
 router.get('/:instructorId', getInstructor);
 
-/**
+/*
  * @swagger
  * /instructors/{id}:
  *   put:
@@ -62,7 +61,8 @@ router.get('/:instructorId', getInstructor);
  *       200:
  *         description: Perfil de instructor actualizado correctamente
  */
-router.put('/:id', uploadProfileImage, updateInstructorProfileController);
+
+//router.put('/:id', uploadProfileImage, updateInstructorProfileController);
 
 /**
  * @swagger

@@ -1,6 +1,7 @@
-version: "3.9"
-
 services:
+  # ------------
+  # DATA BASES
+  # ------------
   mysql_users:
     image: mysql:8.0
     container_name: mysql_users
@@ -42,23 +43,85 @@ services:
     volumes:
       - quizzes_data:/var/lib/mysql
       - ./quiz_service/script/script.sql:/docker-entrypoint-initdb.d/script.sql
-  
-  mysql_chat:
-    image: mysql:8.0
-    container_name: mysql_chat
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_CHAT_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_CHAT_DB}
-      MYSQL_USER: ${MYSQL_CHAT_USER}
-      MYSQL_PASSWORD: ${MYSQL_CHAT_PASSWORD}
-    ports:
-      - "3310:3306"
-    volumes:
-      - quizzes_data:/var/lib/mysql
-      - ./chat_service/script/script.sql:/docker-entrypoint-initdb.d/script.sql
 
+  mongo_chats:
+    image: mongo:8.2
+    container_name: mongo_chats
+    ports:
+      - "27017:27017"
+    volumes:
+      - "chats_data:/data/db"
+
+  # ---------------
+  # MICROSERVICES
+  # ---------------
+
+  users_service:
+    container_name: users_service
+    build: ./user_service
+    depends_on:
+      - mysql_users
+    env_file:
+      - ./user_service/.env
+    environment:
+      DB_HOST: mysql_users
+      DB_PORT: 3306
+    ports:
+      - "4001:3000"
+
+  courses_service:
+    container_name: courses_service
+    build: ./course_service
+    depends_on:
+      - mysql_courses
+    env_file:
+      - ./course_service/.env
+    environment:
+      DB_HOST: mysql_courses
+      DB_PORT: 3306
+    ports:
+      - "4002:3000"
+
+  quizzes_service:
+    container_name: quizzes_service
+    build: ./quiz_service
+    depends_on:
+      - mysql_quizzes
+    env_file:
+      - ./quiz_service/.env
+    environment:
+      DB_HOST: mysql_quizzes
+      DB_PORT: 3306
+    ports:
+      - "4003:3000"
+
+  chats_service:
+    container_name: chats_service
+    build: ./message_service
+    depends_on:
+      - mongo_chats
+    env_file:
+      - ./message_service/.env
+    ports:
+      - "4004:3000"
+
+  # -------------
+  # API GATEWAY
+  # -------------
+
+  api_gateway:
+    container_name: api_gateway
+    build: ./MINAO-ApiGateway
+    depends_on:
+      - users_service
+      - courses_service
+      - quizzes_service
+      - chats_service
+    ports:
+      - "8080:3001"
+  
 volumes:
   users_data:
   courses_data:
   quizzes_data:
-  chat_data:
+  chats_data:
