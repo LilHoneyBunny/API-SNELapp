@@ -39,7 +39,7 @@ router.post('/:idStudent/:idInstructor', CreateChatControllerAsync);
 
 /**
  * @swagger
- * /chats/{idStudent}/{idInstructor}:
+ * /chats/find/{idStudent}/{idInstructor}:
  *   post:
  *     summary: Obtener la id de un chat
  *     tags:
@@ -63,7 +63,7 @@ router.post('/:idStudent/:idInstructor', CreateChatControllerAsync);
  *       404:
  *         description: Parámetros inválidos
  */
-router.get('/:idStudent/:idInstructor', FindChatControllerAsync);
+router.get('find/:idStudent/:idInstructor', FindChatControllerAsync);
 
 /**
  * @swagger
