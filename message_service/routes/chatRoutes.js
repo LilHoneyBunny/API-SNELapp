@@ -63,7 +63,7 @@ router.post('/:idStudent/:idInstructor', CreateChatControllerAsync);
  *       404:
  *         description: Parámetros inválidos
  */
-router.get('find/:idStudent/:idInstructor', FindChatControllerAsync);
+router.get('/find/:idStudent/:idInstructor', FindChatControllerAsync);
 
 /**
  * @swagger
