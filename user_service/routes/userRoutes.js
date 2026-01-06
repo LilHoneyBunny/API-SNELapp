@@ -1,7 +1,8 @@
 const { Router } = require('express');
 const router = Router();
 
-const { registerUser, userLogin, verifyUser, fetchStudents, findUserByEmailJSONController, updateUserBasicProfileController } = require('../controllers/userController');
+const { registerUser, userLogin, verifyUser, fetchStudents, findUserByEmailJSONController, updateUserBasicProfileController, changePasswordController } = require('../controllers/userController');
+const { verifyToken } = require('../middleware/authMiddleware');
 
 /**
  * @swagger
@@ -182,6 +183,8 @@ router.get('/findUserByEmailJSON/:email',  findUserByEmailJSONController);
 router.put('/updateBasicProfile/:userId', updateUserBasicProfileController);
 
 
+
+router.post('/changePassword', verifyToken, changePasswordController);
 
 module.exports = router;
 

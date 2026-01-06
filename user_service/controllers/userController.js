@@ -1,5 +1,6 @@
 const { request, response } = require("express");
 const { generateJWT } = require('../utils/createJWT');
+const bcrypt = require("bcryptjs");
 const HttpStatusCodes = require('../utils/enums');
 const e = require("express");
 const path = require('path');
@@ -11,7 +12,8 @@ const {
     findUser, 
     updateUserVerification, 
     getStudentsByIds, 
-    findUserByEmailJSON
+    findUserByEmailJSON,
+    updateUserPasswordById,
 } = require("../database/dao/userDAO");
 
 
@@ -276,7 +278,79 @@ const updateUserBasicProfileController = async (req, res) => {
     }
 };
 
+const changePasswordController = async (req, res = response) => {
+  try {
+    const { userId, currentPassword, newPassword } = req.body || {};
 
+    // Validaciones básicas
+    if (!userId || !currentPassword || !newPassword) {
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "userId, currentPassword y newPassword son obligatorios."
+      });
+    }
+
+    if (typeof newPassword !== "string" || newPassword.length < 8) {
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "La nueva contraseña debe tener al menos 8 caracteres."
+      });
+    }
+
+    // Seguridad extra: userId del body debe coincidir con el del token
+    // generateJWT mete {userId,email,role}. :contentReference[oaicite:3]{index=3} :contentReference[oaicite:4]{index=4}
+    const tokenUserId = req.user?.userId;
+    const tokenEmail = req.user?.email;
+
+    if (!tokenUserId || !tokenEmail) {
+      return res.status(HttpStatusCodes.UNAUTHORIZED).json({
+        success: false,
+        message: "Token inválido."
+      });
+    }
+
+    if (Number(tokenUserId) !== Number(userId)) {
+      return res.status(HttpStatusCodes.FORBIDDEN).json({
+        success: false,
+        message: "No tienes permiso para cambiar la contraseña de otro usuario."
+      });
+    }
+
+    // Reusa tu lógica de login(email, password) (ahí ya haces bcrypt.compare)
+    const okUser = await login(tokenEmail, currentPassword);
+    if (!okUser) {
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "Contraseña actual incorrecta."
+      });
+    }
+
+    // Hashear nueva
+    const saltRounds = 10;
+    const newHash = await bcrypt.hash(newPassword, saltRounds);
+
+    const result = await updateUserPasswordById(userId, newHash);
+
+    if (!result || result.affectedRows <= 0) {
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "No se pudo actualizar la contraseña."
+      });
+    }
+
+    return res.status(HttpStatusCodes.OK).json({
+      success: true,
+      message: "Contraseña actualizada. Vuelve a iniciar sesión."
+    });
+
+  } catch (error) {
+    console.error("❌ changePasswordController error:", error);
+    return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Error interno del servidor."
+    });
+  }
+};
 
 
 module.exports = { 
@@ -285,5 +359,6 @@ module.exports = {
     verifyUser,  
     fetchStudents, 
     findUserByEmailJSONController,
-    updateUserBasicProfileController
+    updateUserBasicProfileController,
+    changePasswordController
 };
