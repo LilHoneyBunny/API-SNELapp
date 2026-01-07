@@ -3,6 +3,7 @@ const router = express.Router();
 
 const {
     CreateChatControllerAsync,
+    FindChatControllerAsync,
     LoadChatsControllerAsync,
     LoadMessagesControllerAsync,
     SendMessageControllerAsync
@@ -38,6 +39,34 @@ router.post('/:idStudent/:idInstructor', CreateChatControllerAsync);
 
 /**
  * @swagger
+ * /chats/find/{idStudent}/{idInstructor}:
+ *   post:
+ *     summary: Obtener la id de un chat
+ *     tags:
+ *       - Chat
+ *     parameters:
+ *       - in: path
+ *         name: idStudent
+ *         required: true
+ *         schema:
+ *           type: int
+ *         description: ID del Alumno
+ *       - in: path
+ *         name: idInstructor
+ *         required: true
+ *         schema:
+ *           type: int
+ *         description: ID del Instructor
+ *     responses:
+ *       200:
+ *         description: Chat encontrado
+ *       404:
+ *         description: Parámetros inválidos
+ */
+router.get('/find/:idStudent/:idInstructor', FindChatControllerAsync);
+
+/**
+ * @swagger
  * /chats/{idUser}:
  *   get:
  *     summary: Obtener todos los Chats de un usuario
@@ -50,15 +79,6 @@ router.post('/:idStudent/:idInstructor', CreateChatControllerAsync);
  *         schema:
  *           type: int
  *         description: ID del Usuario
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               userType:
- *                 type: string
  *     responses:
  *       200:
  *         description: Chats encontrados

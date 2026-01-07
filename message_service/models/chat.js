@@ -10,7 +10,7 @@ const MessageSchema = new mongoose.Schema({
     },
     UserType: {
         type: String,
-        enum: ['student', 'instructor'],
+        enum: ['Student', 'Instructor'],
         required:true
     },
 })

@@ -1,26 +1,26 @@
-const { ALUMNO, INSTRUCTOR_ESP } = require("../utils/constants");
+const { STUDENT, INSTRUCTOR } = require("../utils/constants");
 
 function ValidateId(id, object) {
     if (!id) {
-        throw { statusCode: 400, mensaje: `La id del ${object} es nula.` };
+        throw { statusCode: 400, message: `La id del ${object} es nula.` };
     }
     if (id <= 0) {
-        throw { statusCode: 400, mensaje: `La id '${id}' del ${object} es inválida.` };
+        throw { statusCode: 400, message: `La id '${id}' del ${object} es inválida.` };
     }
 }
 
 function ValidateUserType(userType) {
     if (!userType) {
-        throw { statusCode: 400, mensaje: `El tipo de usuario es nulo.` };
+        throw { statusCode: 400, message: `El tipo de usuario es nulo.` };
     }
-    if (userType != ALUMNO && userType != INSTRUCTOR_ESP) {
-        throw { statusCode: 400, mensaje: `El tipo de usuario '${userType}' es inválido.` };
+    if (userType != STUDENT && userType != INSTRUCTOR) {
+        throw { statusCode: 400, message: `El tipo de usuario '${userType}' es inválido.` };
     }
 }
 
 function ValidateChat(chat, chatId) {
     if (!chat) {
-        throw { statusCode: 404, mensaje: `No existe ningún chat con la id '${chatId}'.` };
+        throw { statusCode: 404, message: `No existe ningún chat con la id '${chatId}'.` };
     }
 }
 

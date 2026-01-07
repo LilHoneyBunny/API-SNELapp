@@ -20,7 +20,7 @@ const { updateInstructorProfileController } = require("../controllers/profileCon
  *     parameters:
  *       - in: path
  *         name: instructorId
- *         required: true
+ *         revquired: true
  *         schema:
  *           type: integer
  *         description: ID of the instructor
@@ -73,7 +73,14 @@ router.get('/:instructorId', getInstructor);
  *     consumes:
  *       - application/json
  */
-router.put('/:id', updateInstructorProfileController);
+router.put('/:id', (req, res, next) => {
+  console.log("✅ HIT PUT /minao_systems/instructors/:id", {
+    id: req.params.id,
+    body: req.body
+  });
+  return updateInstructorProfileController(req, res, next);
+});
+
 
 /**
  * @swagger

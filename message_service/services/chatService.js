@@ -1,6 +1,6 @@
 const events = require('../events/events');
 const {ValidateChat} = require('../validations/generalValidations');
-const {STUDENT, SEND_MESSAGE_EVENT} = require('../utils/constants');
+const {SEND_MESSAGE_EVENT} = require('../utils/constants');
 
 async function CreateChatAsync(IdStudent, IdInstructor, chat) {
     
@@ -20,28 +20,51 @@ async function CreateChatAsync(IdStudent, IdInstructor, chat) {
     };
 }
 
-async function LoadChatAsync(idUser, userType, chat) {
-    const filter =
-        userType == STUDENT 
-        ? { IdStudent: idUser } 
-        : { IdInstructor: idUser };
-    
-    const chats = await chat.find(
-        filter,
+async function FindChatAsync(IdStudent, IdInstructor, chat) {
+    var chat = await chat.findOne(
+        { IdStudent: IdStudent, IdInstructor: IdInstructor },
+        {
+            IdChat: 1,
+        }
+    ).lean();
+
+    ValidateChat(chat, chat?.idChat);
+
+    return {
+        IdChat: chat.IdChat
+    };
+}
+
+async function LoadChatsAsync(idUser, chat) {
+    var chats = await chat.find(
+        { IdStudent: idUser },
         {
             _id: 0,
             IdChat: 1,
             IdStudent: 1,
             IdInstructor: 1,
-            message: { $slice: -1 },
+            Messages: { $slice: -1 },
         }
     ).lean();
+
+    if (chats.length == 0) {
+        chats = await chat.find(
+            { IdInstructor: idUser },
+            {
+                _id: 0,
+                IdChat: 1,
+                IdStudent: 1,
+                IdInstructor: 1,
+                Messages: { $slice: -1 },
+            }
+        ).lean();
+    } 
 
     return chats.map((chat) => ({
         IdChat: chat.IdChat,
         IdStudent: chat.IdStudent,
         IdInstructor: chat.IdInstructor,
-        lastMessage: chat.Message?.[0] ?? null,
+        LastMessage: chat.Messages?.[0]?.Text ?? null,
     }));
 }
 
@@ -80,4 +103,4 @@ async function SendMessageAsync(idChat, text, userType, chat) {
     return Message[Message.length - 1];
 }
 
-module.exports = {CreateChatAsync, LoadChatAsync, LoadMessagesAsync, SendMessageAsync};
+module.exports = {CreateChatAsync, FindChatAsync, LoadChatsAsync, LoadMessagesAsync, SendMessageAsync};

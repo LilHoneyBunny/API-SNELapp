@@ -1,6 +1,6 @@
 function ErrorsHandler(err, req, res, next) {
-    if (err.statusCode && err.messages) {
-        return res.status(err.statusCode).json({ error: err.messages });
+    if (err.statusCode && err.message) {
+        return res.status(err.statusCode).json({ error: err.message });
     }
 
     console.error('Error inesperado: ', err);

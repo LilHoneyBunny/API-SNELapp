@@ -4,45 +4,42 @@ const fs = require("fs");
 const sharp = require("sharp");
 const HttpStatusCodes = require("../utils/enums");
 
-
 const { updateUserBasicProfile } = require("../database/dao/userDAO");
 const { updateInstructorProfile } = require("../database/dao/instructorDAO");
 const { updateStudentProfile } = require("../database/dao/studentDAO");
 
-
 const validateName = /^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ ]{1,69}$/;
 
-
 const TITLE_MAP = {
-    "Dr.": 1,
-    "Mtro.": 2,
-    "Lic.": 3,
-    "Ing.": 4,
-    "Prof.": 5
+  "Dr.": 1,
+  "Mtro.": 2,
+  "Lic.": 3,
+  "Ing.": 4,
+  "Prof.": 5
 };
 
 const processProfileImage = async (file) => {
-    if (!file) return null;
+  if (!file) return null;
 
-    const publicDir = path.join(__dirname, "..", "public");
-    const avatarsDir = path.join(publicDir, "avatars");
+  const publicDir = path.join(__dirname, "..", "public");
+  const avatarsDir = path.join(publicDir, "avatars");
 
-    if (!fs.existsSync(avatarsDir)) {
-        fs.mkdirSync(avatarsDir, { recursive: true });
-    }
+  if (!fs.existsSync(avatarsDir)) {
+    fs.mkdirSync(avatarsDir, { recursive: true });
+  }
 
-    const fileNameWithoutExt = path.parse(file.filename).name;
-    const outputFileName = `${fileNameWithoutExt}.jpg`;
-    const outputPath = path.join(avatarsDir, outputFileName);
+  const fileNameWithoutExt = path.parse(file.filename).name;
+  const outputFileName = `${fileNameWithoutExt}.jpg`;
+  const outputPath = path.join(avatarsDir, outputFileName);
 
-    await sharp(file.path)
-        .resize({ width: 854, height: 480, fit: "cover" })
-        .jpeg({ quality: 90 })
-        .toFile(outputPath);
+  await sharp(file.path)
+    .resize({ width: 854, height: 480, fit: "cover" })
+    .jpeg({ quality: 90 })
+    .toFile(outputPath);
 
-    fs.unlink(file.path, () => {});
+  fs.unlink(file.path, () => {});
 
-    return `/avatars/${outputFileName}`;
+  return `/avatars/${outputFileName}`;
 };
 
 /**
@@ -50,120 +47,140 @@ const processProfileImage = async (file) => {
  * Actualiza nombre, apellidos y foto (Instructor o Student)
  */
 const updateUserProfileController = async (req, res) => {
-    try {
-        const { userID } = req.params;
+  try {
+    const { userID } = req.params;
 
-        
-        const {
-            userName,
-            paternalSurname,
-            maternalSurname
-        } = req.body || {};
+    const { userName, paternalSurname, maternalSurname } = req.body || {};
 
-        if (!userName && !paternalSurname && !maternalSurname) {
-            return res.status(400).json({
-                success: false,
-                message: "No se enviaron datos para actualizar"
-            });
-        }
-
-        
-        const updatedUser = await updateUserInDB(
-            userID,
-            userName,
-            paternalSurname,
-            maternalSurname
-        );
-
-        return res.json({
-            success: true,
-            user: updatedUser
-        });
-
-    } catch (error) {
-        console.error("Error updateUserProfileController:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Error interno del servidor"
-        });
+    if (!userName && !paternalSurname && !maternalSurname) {
+      return res.status(400).json({
+        success: false,
+        message: "No se enviaron datos para actualizar"
+      });
     }
+
+    const updatedUser = await updateUserInDB(
+      userID,
+      userName,
+      paternalSurname,
+      maternalSurname
+    );
+
+    return res.json({
+      success: true,
+      user: updatedUser
+    });
+
+  } catch (error) {
+    console.error("Error updateUserProfileController:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error interno del servidor"
+    });
+  }
 };
 
 /**
  * PUT /instructors/:id
  */
+/**
+ * PUT /instructors/:id
+ */
 const updateInstructorProfileController = async (req, res = response) => {
-    const { id } = req.params;
-    const { titleName, biography } = req.body;
+  // ✅ A prueba de "Cannot access 'id' before initialization"
+  const id = req.params?.id;
 
-    const titleId = TITLE_MAP[titleName];
-    if (!titleId) {
-        return res.status(HttpStatusCodes.BAD_REQUEST).json({
-            error: true,
-            statusCode: HttpStatusCodes.BAD_REQUEST,
-            details: "Invalid professional title."
-        });
-    }
+  const body = req.body || {};
+  const titleName = body.titleName;
+  const biography = body.biography;
 
-    if (biography && biography.length > 500) {
-        return res.status(HttpStatusCodes.BAD_REQUEST).json({
-            error: true,
-            statusCode: HttpStatusCodes.BAD_REQUEST,
-            details: "Biography too long. Max 500 characters."
-        });
-    }
+  console.log("✅ HIT PUT /instructors/:id", { id, body });
 
-    try {
-        await updateInstructorProfile(id, { titleId, biography });
+  if (!id || isNaN(Number(id))) {
+    return res.status(HttpStatusCodes.BAD_REQUEST).json({
+      error: true,
+      statusCode: HttpStatusCodes.BAD_REQUEST,
+      details: "Invalid instructor id."
+    });
+  }
 
-        return res.status(HttpStatusCodes.OK).json({
-            message: "Instructor profile updated successfully"
-        });
+  const titleId = TITLE_MAP[titleName];
+  if (!titleId) {
+    return res.status(HttpStatusCodes.BAD_REQUEST).json({
+      error: true,
+      statusCode: HttpStatusCodes.BAD_REQUEST,
+      details: "Invalid professional title."
+    });
+  }
 
-    } catch (error) {
-        console.error(error);
-        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-            error: true,
-            statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
-            details: "Error updating instructor profile"
-        });
-    }
+  if (typeof biography === "string" && biography.length > 500) {
+    return res.status(HttpStatusCodes.BAD_REQUEST).json({
+      error: true,
+      statusCode: HttpStatusCodes.BAD_REQUEST,
+      details: "Biography too long. Max 500 characters."
+    });
+  }
+
+  try {
+    const bioToSave =
+      typeof biography === "string" ? biography.trim() : biography;
+
+    const result = await updateInstructorProfile(id, {
+      titleId,
+      biography: bioToSave === "" ? null : bioToSave
+    });
+
+    console.log("✅ DAO result", result);
+
+    return res.status(HttpStatusCodes.OK).json({
+      success: true,
+      message: "Instructor profile updated successfully"
+    });
+  } catch (error) {
+    console.error("❌ updateInstructorProfileController error:", error);
+    return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: true,
+      statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+      details: "Error updating instructor profile"
+    });
+  }
 };
+
 
 /**
  * PUT /students/:id
  */
 const updateStudentProfileController = async (req, res = response) => {
-    const { id } = req.params;
-    const { levelId } = req.body;
+  const { id } = req.params;
+  const { levelId } = req.body;
 
-    if (!levelId || isNaN(Number(levelId))) {
-        return res.status(HttpStatusCodes.BAD_REQUEST).json({
-            error: true,
-            statusCode: HttpStatusCodes.BAD_REQUEST,
-            details: "Invalid educational level id."
-        });
-    }
+  if (!levelId || isNaN(Number(levelId))) {
+    return res.status(HttpStatusCodes.BAD_REQUEST).json({
+      error: true,
+      statusCode: HttpStatusCodes.BAD_REQUEST,
+      details: "Invalid educational level id."
+    });
+  }
 
-    try {
-        await updateStudentProfile(id, { levelId });
+  try {
+    await updateStudentProfile(id, { levelId });
 
-        return res.status(HttpStatusCodes.OK).json({
-            message: "Student profile updated successfully"
-        });
+    return res.status(HttpStatusCodes.OK).json({
+      message: "Student profile updated successfully"
+    });
 
-    } catch (error) {
-        console.error(error);
-        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-            error: true,
-            statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
-            details: "Error updating student profile"
-        });
-    }
+  } catch (error) {
+    console.error(error);
+    return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: true,
+      statusCode: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+      details: "Error updating student profile"
+    });
+  }
 };
 
 module.exports = {
-    updateUserProfileController,
-    updateInstructorProfileController,
-    updateStudentProfileController
+  updateUserProfileController,
+  updateInstructorProfileController,
+  updateStudentProfileController
 };

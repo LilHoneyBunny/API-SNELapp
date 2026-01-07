@@ -1,5 +1,45 @@
 const connection = require("../pool");
 
+const updateInstructorProfile = async (instructorId, fields) => {
+  console.log("DB: pidiendo conexión...");
+  const dbConnection = await connection.getConnection();
+  console.log("DB: conexión obtenida ✅");
+
+  try {
+    const updates = [];
+    const values = [];
+
+    if (fields.titleId !== undefined) {
+      updates.push("titleId = ?");
+      values.push(fields.titleId);
+    }
+    if (fields.biography !== undefined) {
+      updates.push("biography = ?");
+      values.push(fields.biography);
+    }
+
+    if (updates.length === 0) return { affectedRows: 0 };
+
+    const sql = `
+      UPDATE Instructor
+      SET ${updates.join(", ")}
+      WHERE instructorId = ?
+    `;
+
+    values.push(instructorId);
+
+    const [result] = await dbConnection.execute(sql, values); // ✅ antes decía pool.execute
+    return result;
+
+  } catch (error) {
+    console.error("Error updating instructor:", error);
+    throw error;
+  } finally {
+    dbConnection.release();
+    console.log("DB: conexión liberada ✅");
+  }
+};
+
 const getInstructorById = async (instructorId) => {
     const dbConnection = await connection.getConnection();
     try {
@@ -30,41 +70,6 @@ const getInstructorById = async (instructorId) => {
     }
 };
 
-
-const updateInstructorProfile = async (instructorId, fields) => {
-    const dbConnection = await connection.getConnection();
-    try {
-        const updates = [];
-        const values = [];
-
-        if (fields.titleId !== undefined) {
-            updates.push("titleId = ?");
-            values.push(fields.titleId);
-        }
-        if (fields.biography !== undefined) {
-            updates.push("biography = ?");
-            values.push(fields.biography);
-        }
-
-        if (updates.length === 0) return { affectedRows: 0 };
-
-        const sql = `
-            UPDATE Instructor
-            SET ${updates.join(", ")}
-            WHERE instructorId = ?
-        `;
-
-        values.push(instructorId);
-
-        const [result] = await dbConnection.execute(sql, values);
-        return result;
-    } catch (error) {
-        console.error("Error updating instructor:", error);
-        throw error;
-    } finally {
-        dbConnection.release();
-    }
-};
 
 
 const getInstructorId = async (instructorIds) => {
