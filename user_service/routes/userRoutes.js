@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const router = Router();
 
-const { registerUser, userLogin, verifyUser, fetchStudents, findUserByEmailJSONController, updateUserBasicProfileController, changePasswordController } = require('../controllers/userController');
+const { registerUser, userLogin, verifyUser, fetchStudents, findUserByEmailJSONController, updateUserBasicProfileController, changePasswordController, deleteUserController } = require('../controllers/userController');
 const { verifyToken } = require('../middleware/authMiddleware');
 
 /**
@@ -185,6 +185,8 @@ router.put('/updateBasicProfile/:userId', updateUserBasicProfileController);
 
 
 router.post('/changePassword', verifyToken, changePasswordController);
+
+router.delete('/:userId', verifyToken, deleteUserController);
 
 module.exports = router;
 

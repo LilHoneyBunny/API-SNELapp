@@ -1,29 +1,37 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-app.use('/minao_systems/users', require('./routes/users.routes'));
-app.use('/minao_systems/instructors', require('./routes/users.routes'));
-app.use('/minao_systems/students', require('./routes/users.routes'));
+// ✅ USERS SERVICE (users / instructors / students viven en users_service)
+const usersProxy = require("./routes/users.routes");
+app.use("/minao_systems/users", usersProxy);
+app.use("/minao_systems/instructors", usersProxy);
+app.use("/minao_systems/students", usersProxy);
 
-app.use('/minao_systems/courses', require('./routes/courses.routes'));
-app.use('/minao_systems/content', require('./routes/courses.routes'));
-app.use("/minao_systems/student", require('./routes/courses.routes'));
-app.use("/minao_systems/instructor", require('./routes/courses.routes'));
+// ✅ COURSES SERVICE
+const coursesProxy = require("./routes/courses.proxy");
+app.use("/minao_systems/courses", coursesProxy);
+app.use("/minao_systems/student", coursesProxy);
+app.use("/minao_systems/instructor", coursesProxy);
 
-app.use('/minao_systems/content', require('./routes/content.grpc.routes'));
+// ✅ CONTENT (si esto es gRPC gateway, déjalo SOLO aquí)
+app.use("/minao_systems/content", require("./routes/content.grpc.routes"));
 
-app.use('/minao_systems/quizzes', require('./routes/quizzes.routes'));
-app.use('/minao_systems/scores', require('./routes/quizzes.routes'));
-app.use('/minao_systems/report', require('./routes/quizzes.routes'));
+// ✅ QUIZZES SERVICE
+const quizzesProxy = require("./routes/quizzes.proxy");
+app.use("/minao_systems/quizzes", quizzesProxy);
+app.use("/minao_systems/scores", quizzesProxy);
+app.use("/minao_systems/report", quizzesProxy);
 
-app.use('/minao_systems/chats', require('./routes/chats.routes'));
+// ✅ CHATS SERVICE
+const chatsProxy = require("./routes/chats.proxy");
+app.use("/minao_systems/chats", chatsProxy);
 
 app.listen(3001, () => {
-  console.log('API Gateway running on port 3001');
+  console.log("API Gateway running on port 3001");
 });

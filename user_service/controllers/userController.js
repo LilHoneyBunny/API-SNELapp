@@ -14,6 +14,8 @@ const {
     getStudentsByIds, 
     findUserByEmailJSON,
     updateUserPasswordById,
+    softDeleteUserById,  
+    getUserByIdForDelete
 } = require("../database/dao/userDAO");
 
 
@@ -353,12 +355,82 @@ const changePasswordController = async (req, res = response) => {
 };
 
 
-module.exports = { 
-    registerUser, 
-    userLogin, 
-    verifyUser,  
-    fetchStudents, 
-    findUserByEmailJSONController,
-    updateUserBasicProfileController,
-    changePasswordController
+const deleteUserController = async (req, res = response) => {
+  try {
+    const { userId } = req.params;
+    const idParam = parseInt(userId, 10);
+
+    if (!idParam || Number.isNaN(idParam)) {
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "userId inválido"
+      });
+    }
+
+    // ✅ solo puede borrar su propia cuenta
+    const tokenUserId = req.user?.userId;
+    if (!tokenUserId || Number(tokenUserId) !== idParam) {
+      return res.status(HttpStatusCodes.FORBIDDEN).json({
+        success: false,
+        message: "No tienes permiso para eliminar esta cuenta."
+      });
+    }
+
+    // Verifica existencia / estado
+    const user = await getUserByIdForDelete(idParam);
+    if (!user) {
+      return res.status(HttpStatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "Usuario no encontrado."
+      });
+    }
+
+    if (user.isActive === 0) {
+      return res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: "La cuenta ya estaba eliminada."
+      });
+    }
+
+    const result = await softDeleteUserById(idParam);
+
+    if (!result || result.affectedRows <= 0) {
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "No fue posible eliminar la cuenta."
+      });
+    }
+
+    /**
+     * ✅ HOOK (courses)
+     * Si tu microservicio de cursos está separado, aquí NO tenemos su DAO.
+     * Cuando lo conectes, aquí llamarías:
+     * - courseDAO.updateCoursesStateByInstructor(idParam, "Inactivo")
+     */
+
+    return res.status(HttpStatusCodes.OK).json({
+      success: true,
+      message: "Cuenta eliminada correctamente."
+    });
+
+  } catch (error) {
+    console.error("❌ deleteUserController:", error);
+    return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Error interno del servidor"
+    });
+  }
 };
+
+// ... al final, agrega deleteUserController a module.exports ...
+module.exports = {
+  registerUser,
+  userLogin,
+  verifyUser,
+  fetchStudents,
+  findUserByEmailJSONController,
+  updateUserBasicProfileController,
+  changePasswordController,
+  deleteUserController // ✅ NUEVO
+};
+
