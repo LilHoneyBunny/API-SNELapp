@@ -187,7 +187,7 @@ const getCoursesByStudent = async (studentUserId) => {
   const db = await connection.getConnection();
   try {
     const [rows] = await db.execute(
-      `SELECT c.cursoId, c.name, c.description, c.category, c.startDate, c.endDate, c.state
+      `SELECT c.cursoId, c.name, c.description, c.category, c.startDate, c.endDate, c.state, c.instructorUserId
        FROM Curso c
        INNER JOIN Curso_Student cs ON c.cursoId = cs.cursoId
        WHERE cs.studentUserId = ?`,
