@@ -70,7 +70,7 @@ const findUserByEmail = async (email) => {
 };
 
 const findUserByEmailJSON = async (email) => {
-    const query = 'SELECT * FROM User WHERE email = ?';
+    const query = 'SELECT * FROM User WHERE email = ? AND (isActive IS NULL OR isActive = 1)';
     try {
         const [rows] = await connection.execute(query, [email]);
 
@@ -94,7 +94,8 @@ const login = async (email, userPassword) => {
     const query = `
         SELECT userId, userName, paternalSurname, maternalSurname, email, userPassword, userType
         FROM User
-        WHERE email = ? 
+        WHERE email = ?
+            AND (isActive IS NULL OR isActive = 1)
     `;
 
     try {
@@ -238,6 +239,37 @@ const updateUserPasswordById = async (userId, passwordHash) => {
     }
 };
 
+const getUserByIdForDelete = async (userId) => {
+  const db = await connection.getConnection();
+  try {
+    const [rows] = await db.execute(
+      `SELECT userId, userType AS role, isActive
+       FROM User
+       WHERE userId = ?`,
+      [userId]
+    );
+    return rows[0] || null;
+  } finally {
+    db.release();
+  }
+};
+
+const softDeleteUserById = async (userId) => {
+  const db = await connection.getConnection();
+  try {
+    const [result] = await db.execute(
+      `UPDATE User
+       SET isActive = 0,
+           deletedAt = NOW()
+       WHERE userId = ? AND (isActive IS NULL OR isActive = 1)`,
+      [userId]
+    );
+    return result;
+  } finally {
+    db.release();
+  }
+};
+
 
 module.exports = {
     createUser,
@@ -248,5 +280,7 @@ module.exports = {
     getStudentsByIds,
     updateUserBasicProfile,
     findUserByEmailJSON,
-    updateUserPasswordById
+    updateUserPasswordById,
+    getUserByIdForDelete,
+    softDeleteUserById
 };

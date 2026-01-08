@@ -14,6 +14,8 @@ const {
     getStudentsByIds, 
     findUserByEmailJSON,
     updateUserPasswordById,
+    softDeleteUserById,  
+    getUserByIdForDelete
 } = require("../database/dao/userDAO");
 
 
@@ -353,12 +355,141 @@ const changePasswordController = async (req, res = response) => {
 };
 
 
-module.exports = { 
-    registerUser, 
-    userLogin, 
-    verifyUser,  
-    fetchStudents, 
-    findUserByEmailJSONController,
-    updateUserBasicProfileController,
-    changePasswordController
+const deleteUserController = async (req, res = response) => {
+  try {
+    const { userId } = req.params;
+    const idParam = parseInt(userId, 10);
+
+    if (!idParam || Number.isNaN(idParam)) {
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "userId inválido"
+      });
+    }
+
+    // ✅ solo puede borrar su propia cuenta
+    const tokenUserId = req.user?.userId;
+    if (!tokenUserId || Number(tokenUserId) !== idParam) {
+      return res.status(HttpStatusCodes.FORBIDDEN).json({
+        success: false,
+        message: "No tienes permiso para eliminar esta cuenta."
+      });
+    }
+
+    // Verifica existencia / estado
+    const user = await getUserByIdForDelete(idParam);
+    if (!user) {
+      return res.status(HttpStatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "Usuario no encontrado."
+      });
+    }
+
+    if (user.isActive === 0) {
+      return res.status(HttpStatusCodes.OK).json({
+        success: true,
+        message: "La cuenta ya estaba eliminada."
+      });
+    }
+
+    const result = await softDeleteUserById(idParam);
+
+    if (!result || result.affectedRows <= 0) {
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "No fue posible eliminar la cuenta."
+      });
+    }
+
+    /**
+     * ✅ HOOK (courses)
+     * Si tu microservicio de cursos está separado, aquí NO tenemos su DAO.
+     * Cuando lo conectes, aquí llamarías:
+     * - courseDAO.updateCoursesStateByInstructor(idParam, "Inactivo")
+     */
+
+    return res.status(HttpStatusCodes.OK).json({
+      success: true,
+      message: "Cuenta eliminada correctamente."
+    });
+
+  } catch (error) {
+    console.error("❌ deleteUserController:", error);
+    return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Error interno del servidor"
+    });
+  }
 };
+
+const uploadProfileImageController = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // ✅ solo su propia cuenta
+    const tokenUserId = req.user?.userId;
+    if (!tokenUserId || Number(tokenUserId) !== Number(userId)) {
+      return res.status(HttpStatusCodes.FORBIDDEN).json({
+        success: false,
+        message: "No tienes permiso para actualizar la imagen de otro usuario.",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "No se recibió ninguna imagen (profileImage).",
+      });
+    }
+
+    // ✅ path relativo (NO depende del host interno docker)
+    const relativePath = `/uploads/profile_images/${req.file.filename}`;
+
+    // ✅ guarda el path relativo en DB
+    const result = await updateUserBasicProfile(userId, {
+      profileImageUrl: relativePath,
+    });
+
+    if (!result || result.affectedRows <= 0) {
+      return res.status(HttpStatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "Usuario no encontrado o no se realizaron cambios",
+      });
+    }
+
+    // ✅ si quieres devolver también URL absoluta, usa base pública
+    // Configúralo en .env del users_service:
+    // PUBLIC_BASE_URL=http://10.0.2.2:8080   (local android)
+    // o en prod: https://api.tudominio.com
+    const publicBase = process.env.PUBLIC_BASE_URL;
+    const absoluteUrl = publicBase ? `${publicBase}${relativePath}` : null;
+
+    return res.status(HttpStatusCodes.OK).json({
+      success: true,
+      message: "Imagen de perfil actualizada correctamente",
+      profileImageUrl: absoluteUrl ?? relativePath, // compat: si no hay base, manda path
+      profileImagePath: relativePath,               // recomendado para android
+    });
+  } catch (error) {
+    console.error("❌ uploadProfileImageController error:", error);
+    return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Error interno del servidor",
+    });
+  }
+};
+
+
+
+module.exports = {
+  registerUser,
+  userLogin,
+  verifyUser,
+  fetchStudents,
+  findUserByEmailJSONController,
+  updateUserBasicProfileController,
+  changePasswordController,
+  deleteUserController,
+  uploadProfileImageController
+};
+
