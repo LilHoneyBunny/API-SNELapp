@@ -98,6 +98,10 @@ app.use((req, res, next) => {
     return quizzesProxy(req, res, next);
   }
 
+  if (p.startsWith("/minao_systems/report")) {
+    return quizzesProxy(req, res, next);
+  }
+
   // CHATS
   if (p.startsWith("/minao_systems/chats")) {
     return chatsProxy(req, res, next);
