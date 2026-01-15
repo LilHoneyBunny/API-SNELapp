@@ -89,7 +89,12 @@ app.use((req, res, next) => {
   }
 
   // COURSES
-  if (p.startsWith("/minao_systems/courses")) {
+  if (
+    p.startsWith("/minao_systems/courses") ||
+    p.startsWith("/minao_systems/student") ||
+    p.startsWith("/minao_systems/instructor") ||
+    p.startsWith("/minao_systems/content")
+  ) {
     return coursesProxy(req, res, next);
   }
 
