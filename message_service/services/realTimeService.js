@@ -4,6 +4,7 @@ const {SEND_MESSAGE_EVENT} = require('../utils/constants')
 function SendRealTimeMessage(io) {
     events.on(SEND_MESSAGE_EVENT, ({ idChat, message }) => {
         io.to(idChat).emit('nuevoMensaje', message);
+        console.log("Se envió un mensaje al chat " + idChat)
     });
 }
 

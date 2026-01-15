@@ -94,9 +94,11 @@ async function SendMessageAsync(idChat, text, userType, chat) {
 
     ValidateChat(res, idChat);
 
+    const createdMessage = res.Messages[res.Messages.length - 1];
+
     events.emit(SEND_MESSAGE_EVENT, {
-        IdChat: idChat,
-        Message: text,
+        idChat: idChat,
+        message: createdMessage,
     });
 
     const Message = res.Messages;
