@@ -3,6 +3,11 @@ const router = Router();
 const {createNewContent, updateContent, deleteContent, getContentByCourse,
     getContentByTitleController, getContentByDateController} = require('../controller/contentController');
 const {downloadFile, getFilesByContentController, viewContentFileController} = require ('../controller/contentFileController');
+const upload = require("../config/multer");
+const { uploadContentFile } = require("../controller/contentFileController");
+
+router.post("/:contentId/files", upload.single("file"), uploadContentFile);
+
 
 /**
  * @swagger
