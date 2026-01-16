@@ -6,44 +6,43 @@ const { addFileToContent, getFilesByContent, deleteFile } = require("../database
 const HttpStatusCodes = require('../utils/enums');
 
 const uploadContentFile = async (req = request, res = response) => {
-    try {
-        const { contentId } = req.params;
+  try {
+    const { contentId } = req.params;
 
-        if (!req.file) {
-            return res.status(HttpStatusCodes.BAD_REQUEST).json({
-                error: true,
-                message: "No file uploaded"
-            });
-        }
-
-        const fileUrl = "/uploads/" + req.file.filename;
-        const fileType = req.file.mimetype;
-
-        const fileId = await addFileToContent({
-            contentId,
-            fileUrl,
-            fileType
-        });
-
-        callback(
-            null, 
-            {
-                success: true,                          
-                fileId: fileId,                                      
-                message: "Archivo subido y metadatos registrados."   
-            }
-        );
-
-
-    } catch (error) {
-        console.error("Upload error:", error);
-
-        return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
-            error: true,
-            message: "Error uploading file"
-        });
+    if (!req.file) {
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: "No file uploaded",
+      });
     }
+
+    const fileUrl = "/uploads/" + req.file.filename;
+    const fileType = req.file.mimetype;
+    const originalName = req.file.originalname;
+
+    const fileId = await addFileToContent({
+      contentId,
+      fileUrl,
+      fileType,
+      originalName,
+    });
+
+    return res.status(HttpStatusCodes.CREATED).json({
+      success: true,
+      fileId,
+      message: "Archivo subido y metadatos registrados correctamente.",
+    });
+
+  } catch (error) {
+    console.error("Upload error:", error);
+
+    return res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: "Error uploading file",
+    });
+  }
 };
+
 
 const getFilesByContentController = async (req, res) => {
     try {
